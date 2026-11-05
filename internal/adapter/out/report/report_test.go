@@ -135,7 +135,7 @@ func TestCaveatsFromData(t *testing.T) {
 		{TargetRPS: 80000, AchievedRPS: 80000, P99Ms: 20, SUTCPUPct: 65, PassSLO: true},
 		{TargetRPS: 112000, AchievedRPS: 95000, P99Ms: 300, SUTCPUPct: 65, PassSLO: false},
 	}
-	// One column ran once, so it carries no run-to-run spread.
+	// One column measured each benchmark once, so it carries no spread.
 	for i := range arm.Benchmarks {
 		arm.Benchmarks[i].Stats.N = 1
 	}
@@ -144,10 +144,10 @@ func TestCaveatsFromData(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		"load generator's ceiling",              // the server was not the limit
-		"lowest baseline of their architecture", // neither binary uses the newer ISA
-		"arm64-pinned ran once",                 // no spread
-		"Per 8 effective CPUs",                  // what the ratio is per
+		"load generator's ceiling",                        // the server was not the limit
+		"lowest baseline of their architecture",           // neither binary uses the newer ISA
+		"arm64-pinned measured every benchmark only once", // no spread
+		"Per 8 effective CPUs",                            // what the ratio is per
 		"nothing here says what the same CPUs do on bare metal",
 	} {
 		if !strings.Contains(md.String(), want) {

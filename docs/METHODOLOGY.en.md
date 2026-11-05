@@ -60,9 +60,12 @@ one of them.
 9. **Nothing else running.** Results are only valid when the machine is idle
    apart from cpubench. On Kubernetes, use Guaranteed QoS and the static CPU
    manager so the pod gets whole cores.
-10. **Repeat.** Run the decision profile at least 2-3 times per machine. The
-    report shows the spread when several runs share a machine, and warns when a
-    column was measured once.
+10. **Repeat.** Run the decision profile at least 2-3 times per machine, each
+    run with its own `--label` (`x86-01-r1`, `x86-01-r2` …); runs that share a
+    label are merged into one column. Within one run every benchmark is measured
+    several times and the report flags rows whose spread (CV) is above 5%.
+    Across runs, each run is its own column: compare the columns of one machine
+    before you quote a number.
 
 ## 3. What one run measures
 
@@ -170,7 +173,7 @@ ones:
 | implementation differs (crypto) | One side has a hardware instruction the other lacks; the row compares instruction sets, not CPUs |
 | load generator saturated | The web number is the generator's ceiling, not the server's |
 | different layers / different CPU counts | The columns are not like for like |
-| single run | No spread is available; repeat before quoting the number |
+| measured only once | The run used 1 iteration, so no spread is available; use at least 3 |
 | baseline picked automatically | Pass `--baseline <label>` with the machine you run today |
 
 ## 6. What we ask from a vendor
