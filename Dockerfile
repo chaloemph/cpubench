@@ -1,6 +1,12 @@
 # Cross-compiles on the build host (no QEMU needed for the Go build), then
 # packages for each target platform.
-FROM --platform=$BUILDPLATFORM golang:1.26 AS build
+# GO_VERSION is the exact Go release of go.mod (a test keeps them equal), so an
+# image and `make build-all` use the same compiler. GOTOOLCHAIN=local stops Go
+# from downloading a different one. The version is recorded in every result
+# and `compare` warns when two columns differ.
+ARG GO_VERSION=1.26.3
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS build
+ENV GOTOOLCHAIN=local
 ARG TARGETOS TARGETARCH VERSION=dev
 WORKDIR /src
 COPY go.mod go.sum ./

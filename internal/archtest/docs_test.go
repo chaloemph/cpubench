@@ -158,3 +158,16 @@ func TestManualLinksResolve(t *testing.T) {
 		}
 	}
 }
+
+// The Dockerfile pins the Go release that go.mod names, so images and
+// `make build-all` binaries come from the same compiler.
+func TestDockerfileGoVersionMatchesGoMod(t *testing.T) {
+	mod := regexp.MustCompile(`(?m)^go (\d+\.\d+\.\d+)\s*$`).FindStringSubmatch(read(t, "go.mod"))
+	img := regexp.MustCompile(`(?m)^ARG GO_VERSION=(\S+)\s*$`).FindStringSubmatch(read(t, "Dockerfile"))
+	if mod == nil || img == nil {
+		t.Fatalf("cannot find the Go version in go.mod (%v) or Dockerfile (%v)", mod, img)
+	}
+	if mod[1] != img[1] {
+		t.Errorf("Dockerfile GO_VERSION=%s but go.mod says go %s", img[1], mod[1])
+	}
+}

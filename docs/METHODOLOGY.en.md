@@ -29,8 +29,9 @@ the other way round. Every report states which view a number belongs to.
 one of them.
 
 1. **Same binary.** Build with `make build-all` from one commit and copy the
-   matching binary to every machine. Every result records version, commit, Go
-   version and ISA level (`compare` warns on `tool-mismatch`).
+   matching binary to every machine. The Docker image uses the same Go release as
+   `go.mod`. Every result records version, commit, Go version and ISA level
+   (`compare` warns on `tool-mismatch`).
 2. **Same ISA baseline.** The release binaries are built at the base level of
    each architecture (`GOAMD64=v1`, `GOARM64=v8.0`). Neither side uses
    AVX-512 or SVE/SVE2. This is symmetric, but it is not each CPU's peak.

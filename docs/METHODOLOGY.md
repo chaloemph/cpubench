@@ -26,8 +26,8 @@
 `cpubench doctor` ตรวจเกือบทุกข้อ และ `compare` เตือนเมื่อสองคอลัมน์ฝ่าฝืนข้อใดข้อหนึ่ง
 
 1. **binary เดียวกัน** build ด้วย `make build-all` จาก commit เดียว แล้ว copy binary
-   ตัวเดียวกันไปทุกเครื่อง ทุกผลบันทึก version, commit, เวอร์ชัน Go และระดับ ISA
-   (`compare` เตือน `tool-mismatch`)
+   ตัวเดียวกันไปทุกเครื่อง image Docker ใช้ Go รุ่นเดียวกับ `go.mod` ทุกผลบันทึก
+   version, commit, เวอร์ชัน Go และระดับ ISA (`compare` เตือน `tool-mismatch`)
 2. **ระดับ ISA เท่ากัน** binary ที่ปล่อยถูก build ที่ระดับต่ำสุดของแต่ละสถาปัตยกรรม
    (`GOAMD64=v1`, `GOARM64=v8.0`) ทั้งสองฝั่งไม่ใช้ AVX-512 หรือ SVE/SVE2 เป็นเงื่อนไข
    ที่เท่ากัน แต่ไม่ใช่ศักยภาพสูงสุดของ CPU แต่ละตัว crypto ของ Go ยังใช้ AES-NI /
