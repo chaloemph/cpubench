@@ -722,6 +722,12 @@ func caveats(files []*result.File, cmp compare.Report, T tfn) []caveat {
 	} else if len(all) > 0 {
 		add(doctor.Info, "cav.arch_base", strings.Join(all, ", "))
 	}
+	// Columns folded from repeated runs show the spread between runs.
+	for _, f := range files {
+		if len(f.Runs) > 1 {
+			add(doctor.Info, "cav.repeats", f.Label, len(f.Runs))
+		}
+	}
 	// A run with no repetitions has no run-to-run spread to show.
 	if single := singleRun(files); len(single) > 0 {
 		add(doctor.Info, "cav.once", strings.Join(single, ", "))
@@ -983,7 +989,7 @@ func env(files []*result.File, T tfn) []envRow {
 	}
 	// The hardware inventory rows are left out when no column has a value, so
 	// a set of VMs is not padded with empty rows.
-	optional := map[string]bool{T("env.bios"): true, T("env.dimms"): true, T("env.storage"): true, T("env.disks"): true, T("env.netctl"): true}
+	optional := map[string]bool{T("env.bios"): true, T("env.dimms"): true, T("env.storage"): true, T("env.disks"): true, T("env.netctl"): true, T("env.runs"): true}
 	gs := []getter{
 		{T("env.machine"), func(f *result.File) string { return f.Machine + " · " + f.System.Layer() }},
 		{T("env.cpu"), func(f *result.File) string { return orDash(f.System.CPU.Model) }},
@@ -1074,6 +1080,12 @@ func env(files []*result.File, T tfn) []envRow {
 			return f.Build.String()
 		}},
 		{T("env.run"), func(f *result.File) string { return f.Command + " · " + f.CreatedAt.Format("2006-01-02 15:04Z") }},
+		{T("env.runs"), func(f *result.File) string {
+			if len(f.Runs) == 0 {
+				return "–"
+			}
+			return T("env.runs_v", len(f.Runs), strings.Join(f.Runs, ", "))
+		}},
 	}
 	var out []envRow
 	for _, g := range gs {

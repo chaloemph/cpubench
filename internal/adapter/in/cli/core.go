@@ -261,6 +261,7 @@ func cmdCompare(ctx context.Context, d *Deps, args []string) error {
 	title := fs.String("title", "", "report title")
 	lang := fs.String("lang", "th", "report language: th or en")
 	latest := fs.Bool("latest", false, "keep only the newest result per label (handy with a results directory)")
+	repeats := fs.Bool("repeats", false, "fold repeated runs (same --machine, layer and command, different labels) into one column: median of the runs, spread between runs")
 	share := fs.String("for", "", "prepare a copy to send to a vendor: comma-separated labels or machines to keep (the baseline's machine is always kept)")
 	others := fs.String("others", string(app.OthersDrop), "with --for, what to do with every other machine: drop or anonymize")
 	if err := fs.Parse(args); err != nil {
@@ -291,6 +292,36 @@ func cmdCompare(ctx context.Context, d *Deps, args []string) error {
 		files = app.LatestPerLabel(files)
 	}
 	files = app.MergeByLabel(files)
+	if *repeats {
+		if *latest {
+			return fmt.Errorf("--repeats and --latest exclude each other: --latest keeps one run per label")
+		}
+		var groups []app.RepeatGroup
+		files, groups = app.GroupRepeats(files)
+		alias := map[string]string{}
+		for _, g := range groups {
+			fmt.Fprintf(d.Stdout, "repeats: %s = %d runs (%s)\n", g.Label, len(g.Members), strings.Join(g.Members, ", "))
+			for _, m := range g.Members {
+				alias[m] = g.Label
+			}
+		}
+		if len(groups) == 0 {
+			fmt.Fprintln(d.Stderr, "warning: --repeats found no repeated runs; give the runs of one machine the same --machine and different --label")
+		}
+		// A run's own label still names its column.
+		if g, ok := alias[*baseline]; ok {
+			*baseline = g
+		}
+		if *share != "" {
+			keep := strings.Split(*share, ",")
+			for i, k := range keep {
+				if g, ok := alias[k]; ok {
+					keep[i] = g
+				}
+			}
+			*share = strings.Join(keep, ",")
+		}
+	}
 	var guessed []string
 	if *baseline == "" {
 		*baseline = app.DefaultBaseline(files)

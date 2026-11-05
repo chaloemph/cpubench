@@ -122,6 +122,8 @@ internal/
 
 ทุกคำสั่งเขียนไฟล์ `result.File` (schema `cpubench/v1`) หนึ่งไฟล์ คำสั่ง `compare` และ hub จะรวมไฟล์ที่มี **label เดียวกัน** เข้าด้วยกัน (เช่น micro run กับ web load ของ server เดียวกัน) และจัดกลุ่มตาม **machine** เพื่อคำนวณ overhead ของแต่ละ layer
 
+`compare --repeats` เรียก `app.GroupRepeats` หลัง `MergeByLabel`: ไฟล์ที่ machine, `System.Layer()` และ `Command` ตรงกันคือรอบซ้ำ จะถูกรวมเป็นไฟล์เดียวที่มี `Runs` เป็นรายชื่อ label ของแต่ละรอบ แต่ละ benchmark ใช้ median ของ median แต่ละรอบ และ `Stats` เป็นความแกว่งระหว่างรอบ ส่วนอื่นมาจากรอบแรก ถ้า checksum ต่างกันระหว่างรอบ แถวนั้นจะเป็น `ChecksumStable=false` และความต่างของ build หรือ system ระหว่างรอบจะเป็น finding ของคอลัมน์นั้น `anonymize()` เปลี่ยน `Runs` เป็นชื่อแฝงด้วย
+
 ## Build info และ backend ของ crypto
 
 ผลที่ต่างกันอาจมาจาก binary หรือชุดคำสั่ง ไม่ใช่ความเร็ว CPU จึงบันทึกสองเรื่องนี้ไว้ในไฟล์ผล

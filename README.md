@@ -43,6 +43,15 @@ cpubench compare --latest --baseline x86-01 results/
 
 cpubench ไม่เลือกสถาปัตยกรรมใดเป็น baseline ให้เอง ถ้าไม่ใส่ `--baseline` จะใช้ผลแรกตามลำดับที่ส่งเข้าไป และเมื่อมีมากกว่าหนึ่งเครื่อง คำสั่งจะเตือนทาง stderr และ report ขึ้นคำเตือนไว้บนสุด
 
+**รันซ้ำหลายรอบ:** รัน profile สำหรับตัดสินใจ 2–3 รอบต่อเครื่อง ให้ทุกรอบของเครื่องเดียวกันใช้ `--machine` เดียวกันแต่ `--label` ไม่ซ้ำกัน แล้วรวมเป็นคอลัมน์เดียว:
+
+```bash
+for i in 1 2 3; do cpubench auto --profile standard --machine x86-01 --label x86-01-r$i; sleep 30; done
+cpubench compare --repeats --baseline x86-01 results/
+```
+
+รอบที่ machine, layer และคำสั่ง (`auto standard`) ตรงกันถือเป็นรอบซ้ำ แต่ละแถวจะเป็น median ของทุกรอบ และ CV ในรายงานคือความแกว่งระหว่างรอบ ชื่อคอลัมน์คือส่วนที่ label ทุกรอบมีร่วมกัน (`x86-01`) และใช้ label ของรอบใดรอบหนึ่งกับ `--baseline` หรือ `--for` ได้ด้วย ถ้าไม่ใส่ `--repeats` แต่ละรอบจะเป็นคอลัมน์ของตัวเอง ส่วน `--latest` เก็บรอบเดียวต่อ label จึงใช้ร่วมกับ `--repeats` ไม่ได้ และปุ่ม compare บน hub ไม่รวมรอบให้
+
 **ปุ่มเดียวผ่าน hub:**
 
 ```bash

@@ -60,6 +60,7 @@ func TestShareCopyDropsOtherBidders(t *testing.T) {
 func TestShareCopyAnonymizesWithoutLeaks(t *testing.T) {
 	vendord := bidder("vendord-native", "vendord01", "VendorD", "Xeon Platinum 8000C")
 	vendordVM := bidder("vendord-vm", "vendord01", "VendorD", "Xeon Platinum 8000C")
+	vendord.Runs = []string{"vendord-native-r1", "vendord-native-r2"}
 	files := []*result.File{
 		bidder("current-vm", "current", "VendorX", "Xeon Gold 6000A"),
 		bidder("vendora", "vendora01", "VendorA", "Xeon Gold 6000B"),

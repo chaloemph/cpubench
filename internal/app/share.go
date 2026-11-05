@@ -100,6 +100,7 @@ func anonymize(f *result.File, machine, label string) (*result.File, error) {
 	s := &c.System
 	// Names first become the alias; identifying strings become "(hidden)".
 	names := []string{c.Label, c.Machine, c.ID, s.Hostname}
+	names = append(names, c.Runs...)
 	hidden := []string{s.CPU.Model, s.Platform.Vendor, s.Platform.Product, s.Platform.BIOS}
 	for _, d := range s.Memory.DIMMs {
 		hidden = append(hidden, d.Part)
@@ -116,6 +117,9 @@ func anonymize(f *result.File, machine, label string) (*result.File, error) {
 	scrub := scrubber(label, names, hidden)
 
 	c.Label, c.Machine, c.ID = label, machine, label
+	for i := range c.Runs {
+		c.Runs[i] = fmt.Sprintf("%s-run%d", label, i+1)
+	}
 	c.Cost = nil
 	s.Hostname = label
 	s.CPU = hardware.CPUInfo{Arch: s.CPU.Arch, Machine: s.CPU.Machine, Sockets: s.CPU.Sockets,

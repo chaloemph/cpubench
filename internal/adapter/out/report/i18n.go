@@ -131,6 +131,8 @@ var catalog = map[string]msg{
 		"ทุกคอลัมน์ถูก build ที่ baseline ต่ำสุดของสถาปัตยกรรมตัวเอง (%s) จึงไม่มี binary ไหนใช้ชุดคำสั่ง vector หรือ crypto ใหม่ๆ ที่ CPU อาจมี เป็นเงื่อนไขที่เท่ากันทุกคอลัมน์ แต่ไม่ใช่ศักยภาพสูงสุดของ CPU ตัวไหนเลย"},
 	"cav.once": {"%s measured every benchmark only once (1 iteration), so its figures have no spread and noise cannot be told from a real difference. Use at least 3 iterations (every profile uses 2 to 5).",
 		"%s วัดทุก benchmark เพียงครั้งเดียว (1 iteration) ตัวเลขจึงไม่มีช่วงแกว่ง และแยกไม่ได้ว่าความต่างมาจากสัญญาณรบกวนหรือของจริง ควรใช้อย่างน้อย 3 iteration (ทุก profile ใช้ 2 ถึง 5)"},
+	"cav.repeats": {"%s combines %d runs: each row is the median of the runs' medians, and its CV is the spread between runs. Stress, power, web and density come from the first run.",
+		"%s รวม %d รอบ: แต่ละแถวคือ median ของ median แต่ละรอบ และ CV คือความแกว่งระหว่างรอบ ส่วน stress, กำลังไฟ, web และ density มาจากรอบแรก"},
 	"cav.throttled": {"%s was CPU-throttled by its cgroup %d times (%.2fs total).", "%s ถูก cgroup จำกัด CPU (throttle) %d ครั้ง รวม %.2f วินาที"},
 	"cav.loadgen": {"%s: at %s rps the server used only %.0f%% of its CPUs while the step failed the SLO. That number is the load generator's ceiling, not the server's; do not compare it.",
 		"%s: ที่ %s rps server ใช้ CPU เพียง %.0f%% ทั้งที่ขั้นนั้นไม่ผ่าน SLO ตัวเลขนี้เป็นเพดานของตัวยิงโหลด ไม่ใช่ของ server ห้ามนำไปเทียบ"},
@@ -217,6 +219,8 @@ var catalog = map[string]msg{
 	"env.power":     {"Power (avg / max)", "กำลังไฟ (เฉลี่ย / สูงสุด)"},
 	"env.build":     {"Build", "Build"},
 	"env.run":       {"Run", "การรัน"},
+	"env.runs":      {"Repeated runs", "รอบที่รวม"},
+	"env.runs_v":    {"%d: %s", "%d รอบ: %s"},
 
 	// chart titles and axes
 	"chart.scaling":     {"%s — thread scaling", "%s — การขยายตามจำนวน thread"},

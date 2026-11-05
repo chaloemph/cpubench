@@ -60,12 +60,12 @@ one of them.
 9. **Nothing else running.** Results are only valid when the machine is idle
    apart from cpubench. On Kubernetes, use Guaranteed QoS and the static CPU
    manager so the pod gets whole cores.
-10. **Repeat.** Run the decision profile at least 2-3 times per machine, each
-    run with its own `--label` (`x86-01-r1`, `x86-01-r2` …); runs that share a
-    label are merged into one column. Within one run every benchmark is measured
-    several times and the report flags rows whose spread (CV) is above 5%.
-    Across runs, each run is its own column: compare the columns of one machine
-    before you quote a number.
+10. **Repeat.** Run the decision profile at least 2-3 times per machine, with
+    the same `--machine` and a label per run (`x86-01-r1`, `x86-01-r2` …), and
+    compare with `--repeats`: the runs fold into one column whose rows are the
+    median of the runs and whose CV is the spread between runs. Rows above 5%
+    CV are flagged. Without `--repeats` each run is a column of its own, and
+    the CV is the spread between the iterations of that one run.
 
 ## 3. What one run measures
 

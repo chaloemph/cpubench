@@ -54,6 +54,24 @@ cpubench never prefers an architecture. Without `--baseline` it takes the first
 result given, and when there are several machines it warns on stderr and at the
 top of the report.
 
+### Repeated runs
+
+Run the decision profile 2-3 times per machine. Give the runs of one machine
+the same `--machine` and their own `--label`, then fold them into one column:
+
+```bash
+for i in 1 2 3; do cpubench auto --profile standard --machine x86-01 --label x86-01-r$i; sleep 30; done
+cpubench compare --repeats --baseline x86-01 results/
+```
+
+Runs are repeats when they share the machine, the layer and the command
+(`auto standard`). Each row is then the median of the runs, and the CV in the
+report is the spread between runs. The column is named after the common part
+of the labels (`x86-01`); a run's own label works for `--baseline` and `--for`
+too. Without `--repeats` every run is a column of its own. `--latest` keeps one
+run per label instead, so the two flags exclude each other, and the hub's
+compare button does not fold runs.
+
 ## One button through the hub
 
 ```bash

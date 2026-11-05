@@ -459,3 +459,35 @@ func TestProcurementComparison(t *testing.T) {
 		t.Error("limit says per-machine is missing while the report has it")
 	}
 }
+
+// A column folded from repeated runs says so, in the conditions table and in
+// the caveats, because its CV is then the spread between runs.
+func TestRepeatedRunsAreLabelled(t *testing.T) {
+	base := full("x86-01", "x86-01", "amd64", hardware.ModeVM, 1)
+	base.Runs = []string{"x86-01-r1", "x86-01-r2", "x86-01-r3"}
+	arm := full("arm-01", "arm-01", "arm64", hardware.ModeVM, 0.9)
+	for _, lang := range []string{"en", "th"} {
+		var md bytes.Buffer
+		if err := (Markdown{}).Render(&md, []*result.File{base, arm}, port.ReportOptions{Lang: lang, Baseline: "x86-01"}); err != nil {
+			t.Fatal(err)
+		}
+		want := map[string][]string{
+			"en": {"| Repeated runs | 3: x86-01-r1, x86-01-r2, x86-01-r3 | – |", "x86-01 combines 3 runs"},
+			"th": {"| รอบที่รวม | 3 รอบ: x86-01-r1, x86-01-r2, x86-01-r3 | – |", "x86-01 รวม 3 รอบ"},
+		}[lang]
+		for _, w := range want {
+			if !strings.Contains(md.String(), w) {
+				t.Errorf("%s report lacks %q", lang, w)
+			}
+		}
+	}
+	// Without repeats the row stays out of the table.
+	var md bytes.Buffer
+	base.Runs = nil
+	if err := (Markdown{}).Render(&md, []*result.File{base, arm}, port.ReportOptions{Lang: "en", Baseline: "x86-01"}); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(md.String(), "Repeated runs") {
+		t.Error("the repeated-runs row must only appear when a column has repeats")
+	}
+}

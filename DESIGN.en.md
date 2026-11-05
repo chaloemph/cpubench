@@ -122,6 +122,8 @@ Doctor rules that use this data:
 
 Every command writes one `result.File` (schema `cpubench/v1`). `compare` and the hub merge files with the **same label** (for example a micro run and a web load of the same server) and group them by **machine** to compute the overhead of each layer.
 
+`compare --repeats` calls `app.GroupRepeats` after `MergeByLabel`: files that share the machine, `System.Layer()` and `Command` are repeats and fold into one file whose `Runs` lists the runs' labels. Each benchmark is the median of the runs' medians and its `Stats` is the spread between runs; everything else comes from the first run. If the checksums differ between runs the row gets `ChecksumStable=false`, and build or system differences between runs become findings of that column. `anonymize()` replaces `Runs` with aliases too.
+
 ## Build info and the crypto backend
 
 A difference in results may come from the binary or the instruction set rather than CPU speed, so both are recorded in the result file.

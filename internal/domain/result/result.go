@@ -26,6 +26,10 @@ type File struct {
 	FinishedAt time.Time `json:"finished_at"`
 	// Build is how this cpubench binary was built; nil in files from older versions.
 	Build *build.Info `json:"build,omitempty"`
+	// Runs lists the labels of the repeated runs that `compare --repeats`
+	// folded into this file. Each benchmark is then the median of the runs'
+	// medians, and its Stats spread is between runs, not between iterations.
+	Runs []string `json:"runs,omitempty"`
 
 	System   hardware.System  `json:"system"`
 	Config   RunConfig        `json:"config"`
