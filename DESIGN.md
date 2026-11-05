@@ -1,5 +1,7 @@
 # cpubench design
 
+ภาษาไทย · [English](DESIGN.en.md)
+
 เอกสารนี้เขียนให้คนในทีม **และ agent** ที่จะมาพัฒนาต่ออ่านแล้วเริ่มงานได้เลย โดยไม่ต้องอ่านประวัติการคุยก่อนหน้า
 
 ## เป้าหมาย
@@ -150,12 +152,12 @@ internal/
 
 | เรื่อง | สิ่งที่ต้องทำ |
 |---|---|
-| binary arm64 | รันบน ARM64 VM (QEMU/KVM) แล้วทั้ง `auto smoke` และ `auto standard`: checksum ตรงกับ x86 VM ครบทุก workload เมื่อใช้ profile เดียวกัน (รวมงาน float)<br>**ยังไม่ยืนยัน**: bare metal arm64 |
+| binary arm64 | รัน `auto standard` และ `auto full` บน ARM64 VM (QEMU/KVM) ได้ครบ และ report เทียบกับ x86 VM ไม่มีคำเตือน checksum<br>**ยังไม่ยืนยัน**: bare metal arm64 |
 | memory locality บน arm64 VM | ถ้า VM ผูกแค่ vCPU แต่ไม่ผูก memory กับ NUMA node เดียว หน้า memory ส่วนหนึ่งจะอยู่ node อื่น (atomic ช้า ~9 เท่า, DRAM ช้า ~2 เท่า) ตัวเลข `sync/atomic-*`, `mem/latency-*`, `mem/triad` จึงแกว่งและเทียบไม่ได้ ต้องผูกทั้ง vCPU และ memory ดู `deploy/proxmox/create-bench-vm.sh` และ [docs/METHODOLOGY.md](docs/METHODOLOGY.md) |
 | fixture arm64 | ตอนนี้เป็น synthetic: ให้ capture จาก server arm64 จริง (และ x86 server จริง) แล้วตรวจ MIDR, NUMA, NIC ว่าตรงหรือไม่ |
 | Redfish ของ BMC จริง | ทดสอบกับ mock ตาม Redfish spec แล้ว ยังต้องลองกับ BMC ของแต่ละผู้ขาย (iDRAC, iLO, XCC, iBMC ฯลฯ) |
 | Proxmox บน ARM | script สร้าง VM ยังไม่เคยรันจริง (ค่าเริ่มต้นเป็น dry-run) |
-| Docker | ทดสอบบนเครื่องนี้แล้ว: compose `node` (bridge + `HOST_IP`) → ปุ่ม auto/web test → overhead เทียบกับ run ของเครื่องเดียวกันที่อยู่ชั้นล่างสุด (ถ้าไม่มี native จะเทียบกับ VM) และ build image ARM เป็น tar ได้โดยไม่ต้องใช้ QEMU |
+| Docker | ทดสอบแล้ว: compose `node` (bridge + `HOST_IP`) → ปุ่ม auto/web test → overhead เทียบกับ run ของเครื่องเดียวกันที่อยู่ชั้นล่างสุด (ถ้าไม่มี native จะเทียบกับ VM) และ build image ARM เป็น tar ได้โดยไม่ต้องใช้ QEMU |
 | K8s / Helm | ทดสอบบน kind (x86, 1 node) แล้ว: Helm mode `node` → pod เข้า hub → ปุ่ม auto/web test ผ่าน NodePort, Guaranteed QoS แต่ยังไม่ได้ทดสอบ static CPU manager และ cluster แบบ mixed-arch จริง |
 | image `full` สำหรับ arm64 | ต้องใช้ buildx + QEMU หรือ build บน ARM runner |
 

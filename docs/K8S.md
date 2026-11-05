@@ -1,5 +1,7 @@
 # ทดสอบบน Kubernetes
 
+ภาษาไทย · [English](K8S.en.md)
+
 คำถามที่การทดสอบนี้ตอบ: **ถ้ารัน web app ใน pod จะได้ประสิทธิภาพเท่าไหร่ เทียบระหว่าง node ของแต่ละเครื่อง (amd64 หรือ arm64) และเทียบกับ bare metal ของเครื่องเดียวกัน**
 
 ใช้ hub และปุ่มชุดเดียวกับ [INSTALL.md](INSTALL.md) ต่างกันแค่ node ไปรันเป็น pod แทน systemd
@@ -62,10 +64,11 @@ make image-push IMAGE=registry.local/cpubench
 ใช้ image แบบ `slim` (distroless) ซึ่ง cross-compile ได้โดยไม่ต้องใช้ QEMU ตรวจว่ามีทั้งสอง arch:
 
 ```bash
-cpubench scan --image registry.local/cpubench:latest
+cpubench scan --arch amd64 --image registry.local/cpubench:latest
+cpubench scan --arch arm64 --image registry.local/cpubench:latest
 ```
 
-ต้องเห็น `linux/amd64` และ `linux/arm64` และสถานะ `ready`
+ทั้งสองคำสั่งต้องได้สถานะ `ready` และคอลัมน์ platforms ต้องมี `linux/amd64` และ `linux/arm64`
 
 ## 3. สร้าง namespace และ secret
 
@@ -147,7 +150,7 @@ kubectl -n cpubench get pod -l app=cpubench-node -o jsonpath='{range .items[*]}{
 |---|---|
 | job ขึ้น `failed: node lost the job` | pod restart ระหว่างรัน มักเกิดจาก OOM (ดูด้วย `kubectl describe pod` ที่ `Last State: OOMKilled`) ให้เพิ่ม `memory` |
 | pod ค้างที่ `Pending` | ไม่มี node ที่ตรง `arch`/`nodeName` หรือ CPU ไม่พอ (`cpu` + `reservedSystemCPUs` เกินจำนวน core) |
-| `exec format error` / `CrashLoopBackOff` ทันที | image ไม่มี arch นั้น ให้ push ใหม่ด้วย `make image-push` และตรวจด้วย `cpubench scan --image` |
+| `exec format error` / `CrashLoopBackOff` ทันที | image ไม่มี arch นั้น ให้ push ใหม่ด้วย `make image-push` และตรวจด้วย `cpubench scan --arch <amd64\|arm64> --image` |
 | pod ไม่ขึ้นใน hub | `kubectl logs` → ถ้า `401` แปลว่า token ใน secret ผิด ถ้า `connection refused` แปลว่า pod เข้าถึง hub ไม่ได้ (ตรวจ NetworkPolicy, egress, firewall) |
 | web test fail ตั้งแต่ step แรก | lg01 เข้าถึง `http://<node-ip>:30080/healthz` ไม่ได้ ให้ตรวจ firewall ของ node และใช้ NodePort ไม่ซ้ำกันในแต่ละ release |
 | `power: ... timeout` | pod เข้าถึง IP ของ BMC ไม่ได้ (BMC มักอยู่คนละ VLAN) ให้เปิด route หรือเว้น `node.power` ไว้แล้วอ่านค่าไฟจาก node ของ bare metal แทน |

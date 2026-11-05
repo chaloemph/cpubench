@@ -1,199 +1,180 @@
-# Test methodology
+# วิธีทดสอบ
 
-This document explains how cpubench measures a server and how we compare
-machines, so that vendors and other users can reproduce a run and read the
-report the same way we do. Commands and flags are in the [README](../README.md)
-([English](../README.en.md)).
+ภาษาไทย · [English](METHODOLOGY.en.md)
 
-## 1. What question the test answers
+เอกสารนี้อธิบายว่า cpubench วัด server อย่างไร และเราเทียบเครื่องอย่างไร เพื่อให้
+ผู้ขายและผู้ใช้อื่นทำซ้ำได้และอ่านรายงานได้เหมือนเรา คำสั่งและ flag ดูใน
+[README](../README.md) ([English](../README.en.md))
 
-The goal is a sizing or migration decision: can the current fleet move to
-another server (another vendor, another generation, or the other architecture,
-x86-64 or ARM64 in either direction), and how many servers, watts and money
-does that take? We answer it in three views, and a report never mixes them:
+## 1. การทดสอบนี้ตอบคำถามอะไร
 
-| View | Compares | Answers |
+เป้าหมายคือการตัดสินใจเรื่องขนาดระบบหรือการย้ายเครื่อง: fleet ปัจจุบันย้ายไป server
+อีกแบบได้หรือไม่ (ต่างผู้ขาย ต่างรุ่น หรือต่างสถาปัตยกรรม x86-64 ↔ ARM64 ได้ทั้งสองทิศ)
+และต้องใช้กี่เครื่อง กี่วัตต์ กี่บาท เราตอบด้วยมุมมอง 3 แบบ และรายงานไม่เคยปนกัน:
+
+| มุมมอง | เทียบอะไร | ตอบคำถาม |
 |---|---|---|
-| Per core | Each benchmark at the **same thread count** (1, physical cores, all CPUs) | Is one core of B faster or slower than one core of A? |
-| Whole machine | Each machine at **its own maximum** thread count | How much work does one server do, per socket, per watt, per unit of price? |
-| Web | Open-model HTTP load until the SLO breaks | How many requests per second does the server sustain within p99 and error limits? |
+| ต่อ core | แต่ละ benchmark ที่ **จำนวน thread เท่ากัน** (1, จำนวน physical core, ทุก CPU) | 1 core ของ B เร็วหรือช้ากว่า 1 core ของ A? |
+| ทั้งเครื่อง | แต่ละเครื่องที่จำนวน thread **สูงสุดของตัวเอง** | server หนึ่งเครื่องทำงานได้เท่าไหร่ ต่อ socket ต่อวัตต์ ต่อราคา? |
+| Web | โหลด HTTP แบบ open model จนกว่า SLO จะหลุด | server รับได้กี่ request ต่อวินาทีภายใต้ขีดจำกัด p99 และ error? |
 
-A per-core result from a small VM says nothing about a whole 2-socket server, and
-the other way round. Every report states which view a number belongs to.
+ผลต่อ core ของ VM เล็กๆ บอกอะไรเกี่ยวกับ server 2 socket ทั้งเครื่องไม่ได้ และกลับกัน
+รายงานจึงระบุเสมอว่าตัวเลขแต่ละตัวอยู่ในมุมมองไหน
 
-## 2. Rules that make two runs comparable
+## 2. กติกาที่ทำให้สองการรันเทียบกันได้
 
-`cpubench doctor` checks most of these and `compare` warns when two columns break
-one of them.
+`cpubench doctor` ตรวจเกือบทุกข้อ และ `compare` เตือนเมื่อสองคอลัมน์ฝ่าฝืนข้อใดข้อหนึ่ง
 
-1. **Same binary.** Build with `make build-all` from one commit and copy the
-   matching binary to every machine. Every result records version, commit, Go
-   version and ISA level (`compare` warns on `tool-mismatch`).
-2. **Same ISA baseline.** The release binaries are built at the base level of
-   each architecture (`GOAMD64=v1`, `GOARM64=v8.0`). Neither side uses
-   AVX-512 or SVE/SVE2. This is symmetric, but it is not each CPU's peak.
-   Go's crypto still uses AES-NI / SHA-NI / ARMv8 crypto when the CPU has them,
-   and the report shows the implementation used on every crypto row.
-3. **Same OS and kernel family.** Same distribution release on every machine
-   (`os-mismatch`, `kernel-mismatch`).
-4. **Same layer.** Compare native with native, VM with VM, container with
-   container (`mode-mismatch`). The hypervisor is part of the layer: a VMware VM
-   and a KVM VM are different layers (`virt-mismatch`).
-5. **CPU frequency policy.** Set the `performance` governor on bare metal
-   (`sudo cpupower frequency-set -g performance`); `doctor` warns otherwise.
-6. **VM CPU type.** An x86 VM must expose the host CPU (`cpu=host` on Proxmox,
-   or the highest EVC mode on VMware). Generic types such as `kvm64` hide AVX2,
-   AES-NI and SHA-NI, and crypto and compression numbers become meaningless
-   (`vm-cpu-type`).
-7. **NUMA placement of VMs.** Pin the vCPUs **and** the guest memory to one
-   host NUMA node. Pinning only the vCPUs is not enough: part of the guest's
-   memory can land on another node, where atomics were about 9x and DRAM loads
-   about 2x slower in our tests on an ARM64 VM, and the memory and concurrency rows
-   swing by tens of percent between runs. `deploy/proxmox/create-bench-vm.sh`
-   applies these settings (and `balloon=0`, virtio multiqueue).
-8. **Memory population.** Bare metal should have every memory channel
-   populated with identical DIMMs at the rated speed. `doctor` reports unequal
-   channels, mixed DIMMs and DIMMs running below their rated speed.
-9. **Nothing else running.** Results are only valid when the machine is idle
-   apart from cpubench. On Kubernetes, use Guaranteed QoS and the static CPU
-   manager so the pod gets whole cores.
-10. **Repeat.** Run the decision profile at least 2-3 times per machine. The
-    report shows the spread when several runs share a machine, and warns when a
-    column was measured once.
+1. **binary เดียวกัน** build ด้วย `make build-all` จาก commit เดียว แล้ว copy binary
+   ตัวเดียวกันไปทุกเครื่อง ทุกผลบันทึก version, commit, เวอร์ชัน Go และระดับ ISA
+   (`compare` เตือน `tool-mismatch`)
+2. **ระดับ ISA เท่ากัน** binary ที่ปล่อยถูก build ที่ระดับต่ำสุดของแต่ละสถาปัตยกรรม
+   (`GOAMD64=v1`, `GOARM64=v8.0`) ทั้งสองฝั่งไม่ใช้ AVX-512 หรือ SVE/SVE2 เป็นเงื่อนไข
+   ที่เท่ากัน แต่ไม่ใช่ศักยภาพสูงสุดของ CPU แต่ละตัว crypto ของ Go ยังใช้ AES-NI /
+   SHA-NI / ARMv8 crypto เมื่อ CPU มี และรายงานแสดง implementation ที่ใช้ทุกแถวของ crypto
+3. **OS และตระกูล kernel เดียวกัน** distribution release เดียวกันทุกเครื่อง
+   (`os-mismatch`, `kernel-mismatch`)
+4. **layer เดียวกัน** เทียบ native กับ native, VM กับ VM, container กับ container
+   (`mode-mismatch`) hypervisor นับเป็นส่วนของ layer: VM บน VMware กับ VM บน KVM
+   เป็นคนละ layer (`virt-mismatch`)
+5. **นโยบายความถี่ CPU** ตั้ง governor เป็น `performance` บน bare metal
+   (`sudo cpupower frequency-set -g performance`) ถ้าไม่ตั้ง `doctor` จะเตือน
+6. **ชนิด CPU ของ VM** VM บน x86 ต้องเปิดเผย CPU ของ host (`cpu=host` บน Proxmox
+   หรือ EVC mode สูงสุดบน VMware) CPU type ทั่วไปอย่าง `kvm64` ซ่อน AVX2, AES-NI
+   และ SHA-NI ทำให้ตัวเลข crypto และ compression ไม่มีความหมาย (`vm-cpu-type`)
+7. **การวาง NUMA ของ VM** ผูก vCPU **และ** memory ของ guest ไว้ใน NUMA node เดียวของ
+   host การผูกแค่ vCPU ไม่พอ: memory ของ guest ส่วนหนึ่งอาจไปอยู่ node อื่น ซึ่งใน
+   การทดสอบของเรากับ VM ARM64 พบว่า atomic ช้าลงราว 9 เท่า และ DRAM load ช้าลงราว
+   2 เท่า และแถว memory/concurrency แกว่งหลายสิบเปอร์เซ็นต์ระหว่างรอบ
+   `deploy/proxmox/create-bench-vm.sh` ตั้งค่านี้ให้ (รวม `balloon=0` และ virtio multiqueue)
+8. **การใส่ memory** bare metal ควรใส่ DIMM ครบทุก channel เป็น DIMM เหมือนกันและ
+   ทำงานที่ความเร็วตามสเปก `doctor` รายงาน channel ที่ไม่เท่ากัน DIMM ที่ไม่เหมือนกัน
+   และ DIMM ที่ทำงานต่ำกว่าความเร็วตามสเปก
+9. **ไม่มีงานอื่นรัน** ผลใช้ได้ก็ต่อเมื่อเครื่องว่างนอกจาก cpubench บน Kubernetes
+   ให้ใช้ Guaranteed QoS และ static CPU manager เพื่อให้ pod ได้ core เต็มดวง
+10. **ทำซ้ำ** รัน profile สำหรับตัดสินใจอย่างน้อย 2–3 ครั้งต่อเครื่อง รายงานแสดงช่วง
+    ความแปรปรวนเมื่อหลายรอบใช้ machine เดียวกัน และเตือนเมื่อคอลัมน์ใดวัดแค่ครั้งเดียว
 
-## 3. What one run measures
+## 3. การรัน 1 ครั้งวัดอะไร
 
-`cpubench auto --profile <p>` runs every stage below on one machine and writes
-one JSON result plus an HTML report.
+`cpubench auto --profile <p>` รันทุกขั้นตอนด้านล่างบนเครื่องหนึ่ง แล้วเขียนไฟล์ผล JSON
+หนึ่งไฟล์กับรายงาน HTML
 
-| Profile | Time | Iterations | Thread counts | Stress | Power curve |
+| Profile | เวลา | จำนวนรอบ | จำนวน thread | Stress | Power curve |
 |---|---|---|---|---|---|
-| `smoke` | ~1 min | 2 (5% size) | 1, all | 15 s | 0, 100% |
-| `quick` | ~5 min | 3 (30% size) | 1, all | 2 min | 0, 50, 100% |
-| `standard` | ~25 min | 5 | 1, physical cores, all | 10 min | 0-100% in 25% steps |
-| `full` | ~1.5 h | 5 | 1, 2, 4 … physical, all | 30 min | 0-100% in 25% steps |
+| `smoke` | ~1 นาที | 2 (ขนาด 5%) | 1, ทั้งหมด | 15 วินาที | 0, 100% |
+| `quick` | ~5 นาที | 3 (ขนาด 30%) | 1, ทั้งหมด | 2 นาที | 0, 50, 100% |
+| `standard` | ~25 นาที | 5 | 1, physical core, ทั้งหมด | 10 นาที | 0-100% ทีละ 25% |
+| `full` | ~1.5 ชม. | 5 | 1, 2, 4 … physical, ทั้งหมด | 30 นาที | 0-100% ทีละ 25% |
 
-`standard` is the profile for decisions. `smoke` only proves the installation
-works.
+`standard` คือ profile สำหรับตัดสินใจ ส่วน `smoke` ใช้พิสูจน์ว่าติดตั้งเรียบร้อยเท่านั้น
 
-### 3.1 Micro suite (`run`)
+### 3.1 ชุด micro (`run`)
 
-Each benchmark returns a checksum; two machines must produce the same checksum
-for a row to be compared (float rows may differ in the last bits and are
-flagged, not dropped). Threads are placed on physical cores first, one NUMA node
-at a time, then on SMT siblings.
+ทุก benchmark คืนค่า checksum สองเครื่องต้องได้ checksum เท่ากันแถวนั้นจึงเทียบกันได้
+(แถว float อาจต่างกันที่บิตท้ายๆ จะถูกติดธงแต่ไม่ตัดทิ้ง) thread ถูกวางบน physical core
+ก่อน ทีละ NUMA node แล้วจึงวางบน SMT sibling
 
-| Category | Benchmarks | Stands for |
+| หมวด | Benchmark | แทนอะไร |
 |---|---|---|
-| integer | `int/json`, `int/regex`, `int/sort`, `int/hashmap`, `int/compress`, `int/decompress` | Typical application logic: parsing, matching, maps, compression |
-| float | `float/matmul`, `float/nbody`, `float/fft` | Numeric code |
-| crypto | `crypto/aes-gcm`, `crypto/sha256`, `crypto/ecdsa-p256`, `crypto/rsa2048-sign` | TLS bulk encryption, hashing, TLS handshakes |
-| memory | `mem/triad`, `mem/copy` (bandwidth), `mem/latency-32K … 512M` (pointer chase), NUMA matrix (`standard`/`full`) | Cache and DRAM behaviour, cross-node cost |
-| concurrency | `sync/atomic-local`, `sync/atomic-contended`, `sync/mutex`, `sync/pingpong` | Lock-heavy code, cross-core communication |
+| integer | `int/json`, `int/regex`, `int/sort`, `int/hashmap`, `int/compress`, `int/decompress` | logic ของแอปทั่วไป: parse, จับคู่, map, บีบอัด |
+| float | `float/matmul`, `float/nbody`, `float/fft` | โค้ดคำนวณตัวเลข |
+| crypto | `crypto/aes-gcm`, `crypto/sha256`, `crypto/ecdsa-p256`, `crypto/rsa2048-sign` | เข้ารหัสข้อมูล TLS, hash, TLS handshake |
+| memory | `mem/triad`, `mem/copy` (bandwidth), `mem/latency-32K … 512M` (pointer chase), NUMA matrix (`standard`/`full`) | พฤติกรรมของ cache และ DRAM, ต้นทุนข้าม node |
+| concurrency | `sync/atomic-local`, `sync/atomic-contended`, `sync/mutex`, `sync/pingpong` | โค้ดที่ใช้ lock หนัก, การสื่อสารข้าม core |
 
-Categories are summarised with a geometric mean of the per-row ratios, and the
-report always shows the lowest and highest row next to it. A category mean hides
-large differences (for example SHA-256 and RSA can move in opposite directions),
-so read the rows before quoting a category.
+สรุปแต่ละหมวดด้วย geometric mean ของอัตราส่วนรายแถว และรายงานแสดงแถวต่ำสุดกับสูงสุด
+ไว้ข้างๆ เสมอ ค่าเฉลี่ยของหมวดซ่อนความต่างขนาดใหญ่ได้ (เช่น SHA-256 กับ RSA อาจไป
+คนละทิศ) ดังนั้นให้อ่านรายแถวก่อนอ้างตัวเลขของหมวด
 
 ### 3.2 Stress (`stress`)
 
-All threads at full load for the profile's duration. It reports sustained versus
-peak throughput, clock, temperature, power, throttling, checksum errors and
-machine-check (MCE) messages from the kernel log. Its "iterations per second"
-mixes benchmarks of different lengths, so use it for **stability**, not as a
-speed ratio.
+ทุก thread ทำงานเต็มที่ตลอดเวลาที่ profile กำหนด รายงาน throughput ที่ต่อเนื่องเทียบกับ
+ค่าสูงสุด, clock, อุณหภูมิ, กำลังไฟ, การ throttle, checksum error และข้อความ
+machine-check (MCE) จาก kernel log ค่า "iterations per second" ของ stress รวม benchmark
+ที่ยาวไม่เท่ากัน จึงใช้ดู **ความเสถียร** ไม่ใช่อัตราส่วนความเร็ว
 
-### 3.3 Power (`power-curve`, `--power`)
+### 3.3 กำลังไฟ (`power-curve`, `--power`)
 
-Power is read from the BMC over Redfish (`redfish://user@bmc`), IPMI, RAPL or
-hwmon, at 0/25/50/75/100% load. A VM cannot read its host's power: run
-`cpubench power` on a control machine in parallel instead. Per-watt numbers in
-the whole-machine view come from the stress average or the 100% power-curve
-step, so a run without `--power` has no per-watt column.
+อ่านกำลังไฟจาก BMC ผ่าน Redfish (`redfish://user@bmc`), IPMI, RAPL หรือ hwmon ที่โหลด
+0/25/50/75/100% VM อ่านกำลังไฟของ host ไม่ได้: ให้รัน `cpubench power` บนเครื่องควบคุม
+พร้อมกันแทน ค่าต่อวัตต์ในมุมมองทั้งเครื่องมาจากค่าเฉลี่ยของ stress หรือขั้น 100% ของ
+power curve ดังนั้นการรันที่ไม่มี `--power` จะไม่มีคอลัมน์ต่อวัตต์
 
 ### 3.4 Density (`density`)
 
-How many instances of a fixed size (8 threads by default, the size of a typical
-VM or pod) the machine runs while each still gets at least 90% of its solo
-speed.
+เครื่องรัน instance ขนาดคงที่ (ค่าเริ่มต้น 8 thread ซึ่งเป็นขนาด VM หรือ pod ทั่วไป) ได้
+กี่ตัว โดยแต่ละตัวยังได้อย่างน้อย 90% ของความเร็วตอนรันเดี่ยว
 
 ### 3.5 Web (`web serve` + `web load`)
 
-`web serve` is a built-in HTTP target with the same code on every architecture.
-`web load` is an open-model load generator: it sends requests at a fixed rate,
-whether or not earlier ones have returned, so slow servers show up as latency
-and errors instead of a lower request rate.
+`web serve` คือ HTTP target ในตัวที่ใช้โค้ดเดียวกันทุกสถาปัตยกรรม `web load` คือ load
+generator แบบ open model: ส่ง request ตามอัตราคงที่ไม่ว่า request ก่อนหน้าจะกลับมาหรือไม่
+server ที่ช้าจึงปรากฏเป็น latency และ error ไม่ใช่อัตรา request ที่ต่ำลง
 
-- **Ramp** (default): rate steps up until p99 latency (100 ms default) or the
-  error rate (0.1% default) breaks the SLO. `max RPS @ SLO` is the highest step
-  that met the SLO; it is only as fine as the step size.
-- **mix** request preset: 40% JSON, 22% cache read, 3% cache write, 15% HTML
-  template, 10% gzip, 7% JSON parse of a POST body, 3% login (PBKDF2 password hash).
-  `plaintext` is also available but usually saturates the load generator
-  first.
-- The load generator must not be the bottleneck. Run it on a separate machine
-  with enough cores, or split one machine into server CPUs and load CPUs
-  (`tools/web-loopback.sh` puts the server on CPUs 0-3 and the load on 4-7). A
-  step only counts when the **server** CPUs saturate first; the report warns
-  when the load generator saturated before the server.
-- A loopback test compares server CPUs only. It leaves out the NIC and virtio
-  cost, which a test across the real network includes.
-- `web load --scenario` replays your own application's requests
-  (`examples/scenario-*.yaml`).
+- **Ramp** (ค่าเริ่มต้น): เพิ่มอัตราทีละขั้นจนกว่า p99 latency (ค่าเริ่มต้น 100 ms)
+  หรืออัตรา error (ค่าเริ่มต้น 0.1%) จะทำให้ SLO หลุด `max RPS @ SLO` คือขั้นสูงสุด
+  ที่ยังผ่าน SLO และละเอียดได้เท่าขนาดขั้นเท่านั้น
+- preset request **mix**: 40% JSON, 22% อ่าน cache, 3% เขียน cache, 15% HTML template,
+  10% gzip, 7% parse JSON จาก POST body, 3% login (hash รหัสผ่านด้วย PBKDF2)
+  มี `plaintext` ด้วย แต่มักทำให้ load generator อิ่มก่อน
+- load generator ต้องไม่เป็นคอขวด ให้รันบนเครื่องแยกที่มี core พอ หรือแบ่งเครื่อง
+  เดียวเป็น CPU ของ server กับ CPU ของ load (`tools/web-loopback.sh` วาง server ไว้
+  CPU 0-3 และ load ไว้ 4-7) ขั้นจะนับก็ต่อเมื่อ CPU ของ **server** อิ่มก่อน รายงานเตือน
+  เมื่อ load generator อิ่มก่อน server
+- การทดสอบ loopback เทียบเฉพาะ CPU ของ server ไม่รวมต้นทุนของ NIC และ virtio ซึ่ง
+  การทดสอบข้าม network จริงรวมไว้
+- `web load --scenario` เล่นซ้ำ request ของแอปคุณเอง (`examples/scenario-*.yaml`)
 
-## 4. Testing layer by layer
+## 4. ทดสอบทีละ layer
 
-Run every layer of one machine with the same `--machine` and a different
-`--label` (`arm-01-native`, `arm-01-vm`, `arm-01-docker` …). The report
-then shows each layer's overhead against the lowest layer of that machine.
+รันทุก layer ของเครื่องเดียวกันด้วย `--machine` เดียวกันและ `--label` ต่างกัน
+(`arm-01-native`, `arm-01-vm`, `arm-01-docker` …) รายงานจะแสดง overhead ของแต่ละ layer
+เทียบกับ layer ที่ต่ำที่สุดของเครื่องนั้น
 
-| Layer | How | Notes |
+| Layer | วิธี | หมายเหตุ |
 |---|---|---|
-| Bare metal | binary, `auto` | The only layer for per-socket and per-watt numbers |
-| VM | binary inside the VM | Rules 6 and 7 above; read power on the host side |
-| Docker | `deploy/docker/compose.yaml` | Compare with native **on the same VM/host** to isolate the container overhead |
-| Kubernetes | `deploy/k8s/`, `deploy/helm/cpubench` | Guaranteed QoS, static CPU manager; check the worker's own NUMA placement first |
+| Bare metal | binary, `auto` | layer เดียวที่ได้ตัวเลขต่อ socket และต่อวัตต์ |
+| VM | binary ใน VM | ข้อ 6 และ 7 ด้านบน อ่านกำลังไฟฝั่ง host |
+| Docker | `deploy/docker/compose.yaml` | เทียบกับ native **บน VM/host เดียวกัน** เพื่อแยก overhead ของ container |
+| Kubernetes | `deploy/k8s/`, `deploy/helm/cpubench` | Guaranteed QoS, static CPU manager ตรวจการวาง NUMA ของ worker เองก่อน |
 
-## 5. Reading the report
+## 5. อ่านรายงาน
 
-The `compare` report is ordered **conclusion → conditions → numbers → what this
-report cannot answer**. Read the warnings before any number. The most common
-ones:
+รายงานของ `compare` เรียงจาก **ข้อสรุป → เงื่อนไข → ตัวเลข → สิ่งที่รายงานนี้ตอบไม่ได้**
+ให้อ่านคำเตือนก่อนตัวเลข คำเตือนที่พบบ่อยที่สุด:
 
-| Warning | Meaning |
+| คำเตือน | ความหมาย |
 |---|---|
-| checksum differs (outside float) | The two machines did not run the same work; the row is not comparable |
-| implementation differs (crypto) | One side has a hardware instruction the other lacks; the row compares instruction sets, not CPUs |
-| load generator saturated | The web number is the generator's ceiling, not the server's |
-| different layers / different CPU counts | The columns are not like for like |
-| single run | No spread is available; repeat before quoting the number |
-| baseline picked automatically | Pass `--baseline <label>` with the machine you run today |
+| checksum differs (นอกหมวด float) | สองเครื่องไม่ได้รันงานเดียวกัน แถวนั้นเทียบกันไม่ได้ |
+| implementation differs (crypto) | ฝั่งหนึ่งมีชุดคำสั่ง hardware ที่อีกฝั่งไม่มี แถวนั้นเทียบชุดคำสั่ง ไม่ใช่เทียบ CPU |
+| load generator saturated | ตัวเลข web คือเพดานของ load generator ไม่ใช่ของ server |
+| different layers / different CPU counts | คอลัมน์เหล่านั้นไม่ใช่การเทียบแบบเท่ากัน |
+| single run | ไม่มีช่วงความแปรปรวน ควรรันซ้ำก่อนอ้างตัวเลข |
+| baseline picked automatically | ให้ส่ง `--baseline <label>` เป็นเครื่องที่คุณใช้งานอยู่ |
 
-## 6. What we ask from a vendor
+## 6. สิ่งที่เราขอจากผู้ขาย
 
-To test a candidate server under the same conditions as the current fleet:
+เพื่อทดสอบ server ของผู้ขายภายใต้เงื่อนไขเดียวกับ fleet ปัจจุบัน:
 
-1. Bare metal access to the server model being offered, configured as it would
-   be delivered (CPU, every memory channel populated, BIOS version and
-   settings written down).
-2. A BMC user with Redfish read access to power readings.
-3. The same OS release as our baseline (Ubuntu LTS unless agreed otherwise).
-4. Permission to run the `standard` profile at least three times, plus `full`
-   once, and a web test with a separate load generator.
-5. If the server is offered as a VM platform as well, the hypervisor settings
-   for CPU type and NUMA placement.
+1. เข้าถึง bare metal ของรุ่นที่เสนอ ตั้งค่าตามที่จะส่งมอบจริง (CPU, ใส่ memory ครบทุก
+   channel, จดเวอร์ชัน BIOS และค่าที่ตั้งไว้)
+2. user ของ BMC ที่อ่านค่ากำลังไฟผ่าน Redfish ได้
+3. OS release เดียวกับ baseline ของเรา (Ubuntu LTS เว้นแต่ตกลงกันเป็นอย่างอื่น)
+4. อนุญาตให้รัน profile `standard` อย่างน้อย 3 ครั้ง บวก `full` 1 ครั้ง และการทดสอบ web
+   ด้วย load generator ที่แยกเครื่อง
+5. ถ้า server ถูกเสนอเป็นแพลตฟอร์ม VM ด้วย ขอค่าตั้งของ hypervisor เรื่อง CPU type
+   และการวาง NUMA
 
-Each vendor receives a copy of the report that contains only their machine and
-our baseline (`cpubench compare --for <label>`). Other vendors' machines are
-either removed or anonymised, and their prices are never included.
+ผู้ขายแต่ละรายได้รับสำเนารายงานที่มีเฉพาะเครื่องของตนกับ baseline ของเรา
+(`cpubench compare --for <label>`) เครื่องของผู้ขายรายอื่นจะถูกตัดออกหรือปกปิดชื่อ
+และไม่มีการใส่ราคาของรายอื่น
 
-## 7. Known limits
+## 7. ข้อจำกัดที่ทราบ
 
-- Synthetic benchmarks are a proxy. Confirm with your own application through
-  `web load --scenario` and `startup` before a final decision.
-- Inside a VM the clock speed is often hidden (on the ARM64 VMs we tested it
-  could not be read at all), so a VM result cannot separate clock from IPC.
-- A VM result does not stand in for a different CPU model of the same vendor.
-  `cpubench info` shows the ARM MIDR part number; compare it with the CPU you
-  plan to buy.
+- benchmark สังเคราะห์เป็นเพียงตัวแทน ให้ยืนยันกับแอปของคุณเองด้วย `web load --scenario`
+  และ `startup` ก่อนตัดสินใจขั้นสุดท้าย
+- ใน VM มักมองไม่เห็นความเร็ว clock (ใน VM ARM64 ที่เราทดสอบ อ่านไม่ได้เลย) ผลจาก VM
+  จึงแยกไม่ได้ว่าความต่างมาจาก clock หรือ IPC
+- ผลจาก VM ใช้แทน CPU อีกรุ่นของผู้ขายเดียวกันไม่ได้ `cpubench info` แสดงเลข part
+  MIDR ของ ARM ให้เทียบกับ CPU ที่คุณวางแผนจะซื้อ

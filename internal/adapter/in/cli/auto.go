@@ -19,11 +19,11 @@ func init() {
 }
 
 func cmdAuto(ctx context.Context, d *Deps, args []string) error {
-	fs := newFlags(d, "auto", "[--profile quick|standard|full] [--power SRC] [--target URL]")
+	fs := newFlags(d, "auto", "[--profile smoke|quick|standard|full] [--power SRC] [--target URL]")
 	var o outputFlags
 	o.register(fs, true)
 	profile := fs.String("profile", "standard", "smoke (~1 min check), quick (~5 min), standard (~25 min), full (~1.5 h)")
-	target := fs.String("target", "", "also load test this web target (run `cpubench web serve` there)")
+	target := fs.String("target", "", "also load test this web target (run 'cpubench web serve' there)")
 	endpoint := fs.String("endpoint", "mix", "web request preset for --target")
 	p99 := fs.Float64("slo-p99", 100, "web SLO: p99 ms")
 	conc := fs.Int("concurrency", 512, "web: max in-flight requests")

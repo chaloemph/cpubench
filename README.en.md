@@ -12,7 +12,7 @@ several vendors.
 - Builds self-contained HTML and Markdown reports (Thai or English)
 - A hub with run buttons collects the results from every machine
 
-How we test and how to read the numbers: **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)**.
+How we test and how to read the numbers: **[docs/METHODOLOGY.en.md](docs/METHODOLOGY.en.md)**.
 
 ## Install
 
@@ -154,7 +154,7 @@ Power sources (`--power`): `redfish://user@bmc`, `ipmi://local`,
 
 The report goes **conclusion → conditions → numbers → what it cannot answer**.
 Read the warnings before any number; see
-[docs/METHODOLOGY.md §5](docs/METHODOLOGY.md#5-reading-the-report). Set the
+[docs/METHODOLOGY.en.md §5](docs/METHODOLOGY.en.md#5-reading-the-report). Set the
 language with `cpubench compare --lang th|en` (default `th`).
 
 The **whole machine** section compares each machine at its own maximum thread
@@ -181,14 +181,15 @@ cpubench compare --baseline current-vm --for vendora01 --others anonymize --lang
 
 ## Deploy
 
-- `deploy/docker/compose.yaml`: node, SUT, load generator, micro, hub ([docs/DOCKER.md](docs/DOCKER.md))
+- `deploy/docker/compose.yaml`: node, SUT, load generator, micro, hub ([docs/DOCKER.en.md](docs/DOCKER.en.md))
 - `deploy/k8s/`: Job for micro, Deployment + NodePort for the web SUT, hub
-- `deploy/helm/cpubench`: chart with `mode` (node/auto/micro/stress/sut/hub) and `arch` ([docs/K8S.md](docs/K8S.md))
+- `deploy/helm/cpubench`: chart with `mode` (node/auto/micro/stress/sut/hub) and `arch` ([docs/K8S.en.md](docs/K8S.en.md))
 - `deploy/proxmox/create-bench-vm.sh`: VM with `cpu=host`, NUMA binding, no balloon, virtio multiqueue, UEFI on ARM (dry-run by default)
 - `scripts/collect-info.sh`, `scripts/capture-fixture.sh`: collect machine info / test fixtures
 
-Install guides (Thai): [bare metal + hub](docs/INSTALL.md) · [Docker](docs/DOCKER.md) · [Kubernetes](docs/K8S.md).
-Architecture and how to extend it (Thai): [DESIGN.md](DESIGN.md).
+Install guides: [bare metal + hub](docs/INSTALL.en.md) · [Docker](docs/DOCKER.en.md) · [Kubernetes](docs/K8S.en.md).
+Architecture and how to extend it: [DESIGN.en.md](DESIGN.en.md).
+Every guide also exists in Thai (the same file name without `.en`).
 
 ## License
 

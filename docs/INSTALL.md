@@ -1,23 +1,25 @@
 # ติดตั้ง cpubench hub + node (x86-64 และ ARM64)
 
+ภาษาไทย · [English](INSTALL.en.md)
+
 เป้าหมาย: ติดตั้งครั้งเดียว จากนั้นทุกการทดสอบสั่งด้วยปุ่มบนหน้าเว็บ hub
 ใช้เวลาติดตั้งประมาณ 30–45 นาที (ส่วนใหญ่เป็นการตั้งค่า BIOS และ BMC)
 
 ## 0. วางเครื่อง
 
 ```
-                     ┌──────────────────────────────┐
-                     │ lg01  (load generator + hub)  │  x86 เครื่องที่ 3, ≥16 core, NIC ≥10GbE
-                     │  cpubench hub    :8090        │
-                     │  cpubench node   (lg01)       │
-                     └──────────────┬───────────────┘
-              switch เดียวกัน        │
-          ┌─────────────────────────┴─────────────────────────┐
-┌─────────┴──────────────┐                        ┌───────────┴────────────┐
-│ arm-01 (ARM, SUT)   │                        │ x86-01 (x86, SUT)  │
-│  cpubench node :8080   │                        │  cpubench node :8080   │
-│  BMC   → Redfish/IPMI  │                        │  BMC   → Redfish/IPMI  │
-└────────────────────────┘                        └────────────────────────┘
+                  ┌───────────────────────────────┐
+                  │ lg01 (load generator + hub)   │  เครื่องที่ 3 แบบ x86, ≥16 core, NIC ≥10GbE
+                  │   cpubench hub   :8090        │
+                  │   cpubench node  (lg01)       │
+                  └───────────────┬───────────────┘
+                                  │  switch เดียวกัน
+          ┌───────────────────────┴───────────────────────┐
+┌─────────┴──────────────┐                    ┌───────────┴────────────┐
+│ arm-01 (ARM, SUT)      │                    │ x86-01 (x86, SUT)      │
+│  cpubench node :8080   │                    │  cpubench node :8080   │
+│  BMC → Redfish/IPMI    │                    │  BMC → Redfish/IPMI    │
+└────────────────────────┘                    └────────────────────────┘
 ```
 
 | บทบาท | เครื่อง | ทำไม |
@@ -294,5 +296,5 @@ ExecStart=/usr/local/bin/cpubench node --hub http://<lg01-ip>:8090 --name arm-01
 - hub ส่งได้เฉพาะชนิดงานที่กำหนดไว้ (auto, web-serve, web-load) **ไม่สามารถสั่งคำสั่ง shell บน node ได้**
 - token อยู่ใน `/etc/cpubench*.env` (สิทธิ์ 600) และรหัสผ่าน BMC อยู่บน node เท่านั้น ไม่ถูกส่งผ่าน hub
 - node service รันเป็น root เพื่ออ่าน DIMM, ใช้ `ipmi://local` และ pin CPU ได้ ถ้าไม่ต้องการ ให้ใส่ `User=` ใน unit แต่จะไม่ได้ข้อมูล DIMM
-- ใช้ในเครือข่ายทดสอบเท่านั้น hub ยังไม่มี TLS ถ้าต้องเข้าถึงจากนอกเครือข่าย ให้วาง reverse proxy ที่มี HTTPS ไว้หน้า hub
+- ใช้ในเครือข่ายทดสอบเท่านั้น hub ยังไม่มี TLS ถ้าต้องเข้าถึงจากนอกเครือข่าย ให้วาง reverse proxy ที่มี HTTPS ไว้หน้า hub (ดู [SECURITY.md](../SECURITY.md))
 - เมื่อทดสอบเสร็จแล้ว ปิด service ทั้งหมดด้วย `sudo systemctl disable --now cpubench-node cpubench-hub`

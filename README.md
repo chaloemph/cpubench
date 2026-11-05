@@ -174,6 +174,7 @@ cpubench compare --baseline current-vm --for vendora01 --others anonymize --lang
 - `scripts/collect-info.sh`, `scripts/capture-fixture.sh`: เก็บข้อมูลเครื่อง / fixture สำหรับ test
 
 คู่มือติดตั้ง: [bare metal + hub](docs/INSTALL.md) · [Docker](docs/DOCKER.md) · [Kubernetes](docs/K8S.md)
+ทุกคู่มือมีฉบับภาษาอังกฤษด้วย (ชื่อไฟล์เดียวกันต่อท้าย `.en`)
 
 ดูสถาปัตยกรรมและวิธีพัฒนาต่อได้ที่ [DESIGN.md](DESIGN.md) · ก่อนเปิด hub ให้คนอื่นเข้าถึง อ่าน [SECURITY.md](SECURITY.md)
 

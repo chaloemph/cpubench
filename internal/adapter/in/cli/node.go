@@ -45,7 +45,7 @@ func cmdNode(ctx context.Context, d *Deps, args []string) error {
 	machine := fs.String("machine", "", "physical server this node runs on; set it for VM/container nodes so the report shows layer overhead (default: --name)")
 	powerSrc := fs.String("power", "", "this machine's power source (credentials stay on this machine)")
 	addr := fs.String("addr", "", "address other nodes use to reach this one for web tests (default: detected)")
-	webPort := fs.Int("web-port", 8080, "port `web serve` listens on during web tests")
+	webPort := fs.Int("web-port", 8080, "port 'web serve' listens on during web tests")
 	advPort := fs.Int("advertise-port", 0, "port load generators connect to, if different (e.g. a Kubernetes NodePort; default: --web-port)")
 	if err := fs.Parse(args); err != nil {
 		return err

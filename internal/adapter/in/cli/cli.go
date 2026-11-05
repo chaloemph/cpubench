@@ -109,7 +109,7 @@ func (o *outputFlags) register(fs *flag.FlagSet, withPower bool) {
 	fs.StringVar(&o.out, "o", "", "write the result JSON here (default: results/<id>.json)")
 	fs.StringVar(&o.html, "html", "", "also render an HTML report to this path")
 	fs.StringVar(&o.md, "md", "", "also render a Markdown report to this path")
-	fs.StringVar(&o.upload, "upload", "", "upload the result to a cpubench hub, e.g. http://hub:8080")
+	fs.StringVar(&o.upload, "upload", "", "upload the result to a cpubench hub, e.g. http://hub:8090")
 	fs.StringVar(&o.token, "token", os.Getenv("CPUBENCH_TOKEN"), "hub token ($CPUBENCH_TOKEN)")
 	if withPower {
 		fs.StringVar(&o.power, "power", "", "power source: redfish://user@bmc, ipmi://local, rapl, hwmon, const:W")

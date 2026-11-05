@@ -119,9 +119,9 @@ func cmdWebLoad(ctx context.Context, d *Deps, args []string) error {
 	conc := fs.Int("concurrency", 512, "max in-flight requests (total across agents)")
 	keepAlive := fs.Bool("keepalive", true, "reuse connections (false = new TCP/TLS connection per request)")
 	warmup := fs.Duration("warmup", 10*time.Second, "warmup before measuring (JIT, caches)")
-	agents := fs.String("agents", "", "comma-separated `web agent` addresses for distributed load (default: this process)")
+	agents := fs.String("agents", "", "comma-separated 'web agent' addresses for distributed load (default: this process)")
 	adaptive := fs.Bool("adaptive", false, "ramp by doubling the rate, then refine near the knee (fewer steps on big servers)")
-	sutStats := fs.Bool("sut-stats", true, "read SUT CPU and system info from /_cpubench/* when the target is `web serve`")
+	sutStats := fs.Bool("sut-stats", true, "read SUT CPU and system info from /_cpubench/* when the target is 'web serve'")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func init() {
 
 func cmdHub(ctx context.Context, d *Deps, args []string) error {
 	fs := newFlags(d, "hub", "[--listen :8090] [--dir hubdata] [--token T]")
-	addr := fs.String("listen", ":8090", "listen address (8090 so it never clashes with `web serve` on 8080)")
+	addr := fs.String("listen", ":8090", "listen address (8090 so it never clashes with 'web serve' on 8080)")
 	dir := fs.String("dir", "hubdata", "directory for uploaded results")
 	token := fs.String("token", os.Getenv("CPUBENCH_TOKEN"), "token required to upload ($CPUBENCH_TOKEN; empty = open)")
 	if err := fs.Parse(args); err != nil {

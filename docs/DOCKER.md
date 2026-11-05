@@ -1,5 +1,7 @@
 # ทดสอบบน Docker
 
+ภาษาไทย · [English](DOCKER.en.md)
+
 คำถามที่การทดสอบนี้ตอบ: **ถ้ารัน web app ใน container จะได้ประสิทธิภาพเท่าไหร่ เทียบระหว่างเครื่องที่จะเลือก (x86-64 หรือ ARM64 จากผู้ขายใดก็ได้) และเทียบกับ bare metal ของเครื่องเดียวกัน** รวมถึง overhead ของ network แบบ bridge (docker-proxy/NAT) เทียบกับ `--network host`
 
 ใช้ hub และปุ่มชุดเดียวกับ [INSTALL.md](INSTALL.md) ต่างกันแค่ node ไปรันใน container
