@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cpubench sample report (WSL2 dev laptop, not a server)</title>
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--text:#1d1d1b;--muted:#6b6a65;--line:#e4e2da;--good:#2f7d32;--good-bg:#e8f3e3;--bad:#b3261e;--bad-bg:#fbe9e7;--warn:#8a5a00;--warn-bg:#fdf1d8;
+--s0:#2b6cb0;--s1:#d0602a;--s2:#2f8f6b;--s3:#8a4fbf;--s4:#b8860b;--s5:#c2417a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b19;--card:#242422;--text:#ecebe6;--muted:#a3a29b;--line:#3a3935;--good:#7cc47f;--good-bg:#1f3320;--bad:#f2948c;--bad-bg:#3d2220;--warn:#f0c46b;--warn-bg:#3a2f15;
+--s0:#6aa5e8;--s1:#f08a55;--s2:#5cc49a;--s3:#b58ae6;--s4:#e0b84a;--s5:#e57aa5}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 64px}h1{font-size:24px;margin:0 0 4px;font-weight:600}h2{font-size:18px;margin:36px 0 12px;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{font-size:15px;margin:20px 0 8px}.muted{color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:20px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.card .l{font-size:12px;color:var(--muted)}.card .v{font-size:22px;font-weight:600;margin:2px 0}.card .s{font-size:12px;color:var(--muted)}
+.card.good .v{color:var(--good)}.card.bad .v{color:var(--bad)}
+.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th{font-weight:600;color:var(--muted);background:var(--card);position:sticky;top:0}
+td:first-child,th:first-child{text-align:left}tr:last-child td{border-bottom:none}.cv{color:var(--muted);font-size:11px;margin-left:4px}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}td.good{background:var(--good-bg)}td.bad{background:var(--bad-bg)}td.warn{background:var(--warn-bg)}
+.noisy{color:var(--warn)}.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:6px;background:var(--bad-bg);color:var(--bad);margin-left:6px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+svg.chart{width:100%;height:auto;display:block}svg .grid{stroke:var(--line);stroke-width:1}svg .axis{stroke:var(--muted);stroke-width:1}svg .ref{stroke:var(--bad);stroke-dasharray:4 4}
+svg text{fill:var(--muted);font-size:11px}svg .ct{fill:var(--text);font-size:13px;font-weight:600}svg .cl{fill:var(--text);font-size:12px}
+svg .ln{fill:none;stroke-width:2}svg .s0{stroke:var(--s0);fill:var(--s0)}svg .s1{stroke:var(--s1);fill:var(--s1)}svg .s2{stroke:var(--s2);fill:var(--s2)}svg .s3{stroke:var(--s3);fill:var(--s3)}svg .s4{stroke:var(--s4);fill:var(--s4)}svg .s5{stroke:var(--s5);fill:var(--s5)}
+svg polyline.ln{fill:none}svg rect.good{fill:var(--good)}svg rect.bad{fill:var(--bad)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin:4px 0 0 64px}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sw.s0{background:var(--s0)}.sw.s1{background:var(--s1)}.sw.s2{background:var(--s2)}.sw.s3{background:var(--s3)}.sw.s4{background:var(--s4)}.sw.s5{background:var(--s5)}
+ul.find{list-style:none;padding:0;margin:0}ul.find li{padding:6px 0;border-bottom:1px solid var(--line)}ul.find li:last-child{border:none}.sev{font-size:11px;font-weight:600;text-transform:uppercase;margin-right:8px}
+code{font-size:12px;background:var(--line);padding:1px 4px;border-radius:4px}
+</style>
+</head>
+<body><main>
+<h1>cpubench sample report (WSL2 dev laptop, not a server)</h1>
+<div class="muted">Generated 2026-10-30 15:28 &#43;07 · 1 result file(s)</div>
+
+<div class="cards"><div class="card "><div class="l">CPU</div><div class="v">13th Gen Intel(R) Core(TM) i7-1360P</div><div class="s">amd64 · 6 logical CPUs</div></div><div class="card "><div class="l">Context</div><div class="v">vm</div><div class="s">6 effective CPUs</div></div><div class="card "><div class="l">Benchmarks</div><div class="v">45</div><div class="s">8 doctor findings</div></div><div class="card "><div class="l">Max RPS @ SLO</div><div class="v">6498</div><div class="s">p99 ≤ 50 ms</div></div></div>
+
+
+
+<h2>Web load test</h2>
+<div class="grid2"><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>p99 latency vs achieved load</title><text class="ct" x="64" y="16">p99 latency vs achieved load</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">50.0</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">100</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">150</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">200</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">500</text><text class="ax" x="204.0" y="232.0" text-anchor="middle">2000</text><text class="ax" x="344.0" y="232.0" text-anchor="middle">3499</text><text class="ax" x="484.1" y="232.0" text-anchor="middle">5000</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6498</text><text class="ax" x="344.0" y="254" text-anchor="middle">requests/s</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">p99 ms</text><line class="ref" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><polyline class="ln s0" points="64.0,213.5 204.0,193.2 344.0,212.3 484.1,47.5 624.0,181.7"/><circle class="pt s0" cx="64.0" cy="213.5" r="3"><title>wsl-dev: 500, 2.70</title></circle><circle class="pt s0" cx="204.0" cy="193.2" r="3"><title>wsl-dev: 2000, 24.2</title></circle><circle class="pt s0" cx="344.0" cy="212.3" r="3"><title>wsl-dev: 3499, 3.92</title></circle><circle class="pt s0" cx="484.1" cy="47.5" r="3"><title>wsl-dev: 5000, 179</title></circle><circle class="pt s0" cx="624.0" cy="181.7" r="3"><title>wsl-dev: 6498, 36.4</title></circle></svg></div></div>
+<h3>wsl-dev — ramp · http://127.0.0.1:18080 · max RPS @ SLO <b>6498</b></h3>
+<div class="scroll"><table><tr><th>target rps</th><th>achieved</th><th>p50 ms</th><th>p90</th><th>p99</th><th>p99.9</th><th>errors</th><th>dropped</th><th>SUT CPU</th><th>watts</th><th>rps/W</th><th>SLO</th></tr>
+<tr><td>500</td><td>500</td><td>1.0</td><td>1.5</td><td>2.7</td><td>4.5</td><td>0</td><td>0</td><td>6.0%</td><td>–</td><td>–</td><td class="good">pass</td></tr><tr><td>2000</td><td>2000</td><td>0.9</td><td>2.8</td><td>24.2</td><td>45.9</td><td>0</td><td>0</td><td>31.7%</td><td>–</td><td>–</td><td class="good">pass</td></tr><tr><td>3500</td><td>3499</td><td>0.7</td><td>1.7</td><td>3.9</td><td>10.0</td><td>0</td><td>0</td><td>39.3%</td><td>–</td><td>–</td><td class="good">pass</td></tr><tr><td>5000</td><td>5000</td><td>1.1</td><td>15.5</td><td>179.3</td><td>270.5</td><td>0</td><td>0</td><td>71.9%</td><td>–</td><td>–</td><td class="bad">fail</td></tr><tr><td>6500</td><td>6498</td><td>0.8</td><td>5.8</td><td>36.4</td><td>68.7</td><td>0</td><td>0</td><td>71.1%</td><td>–</td><td>–</td><td class="good">pass</td></tr>
+</table></div>
+
+
+
+<h2>Thread scaling</h2><div class="grid2"><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>int/json — thread scaling</title><text class="ct" x="64" y="16">int/json — thread scaling</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">625</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">1250</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">1875</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">2500</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">threads</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">Krec/s</text><polyline class="ln s0" points="64.0,158.6 624.0,62.3"/><circle class="pt s0" cx="64.0" cy="158.6" r="3"><title>wsl-dev: 1.00, 763</title></circle><circle class="pt s0" cx="624.0" cy="62.3" r="3"><title>wsl-dev: 6.00, 2044</title></circle></svg></div><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>int/compress — thread scaling</title><text class="ct" x="64" y="16">int/compress — thread scaling</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">25.0</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">50.0</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">75.0</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">100</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">threads</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">MB/s</text><polyline class="ln s0" points="64.0,179.1 624.0,54.0"/><circle class="pt s0" cx="64.0" cy="179.1" r="3"><title>wsl-dev: 1.00, 19.6</title></circle><circle class="pt s0" cx="624.0" cy="54.0" r="3"><title>wsl-dev: 6.00, 86.2</title></circle></svg></div><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>float/matmul — thread scaling</title><text class="ct" x="64" y="16">float/matmul — thread scaling</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">5000</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">10.0k</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">15.0k</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">20.0k</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">threads</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">MFLOP/s</text><polyline class="ln s0" points="64.0,167.1 624.0,35.6"/><circle class="pt s0" cx="64.0" cy="167.1" r="3"><title>wsl-dev: 1.00, 5200</title></circle><circle class="pt s0" cx="624.0" cy="35.6" r="3"><title>wsl-dev: 6.00, 19.2k</title></circle></svg></div><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>crypto/aes-gcm — thread scaling</title><text class="ct" x="64" y="16">crypto/aes-gcm — thread scaling</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">6250</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">12.5k</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">18.8k</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">25.0k</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">threads</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">MB/s</text><polyline class="ln s0" points="64.0,171.5 624.0,65.3"/><circle class="pt s0" cx="64.0" cy="171.5" r="3"><title>wsl-dev: 1.00, 5922</title></circle><circle class="pt s0" cx="624.0" cy="65.3" r="3"><title>wsl-dev: 6.00, 20.0k</title></circle></svg></div><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>mem/triad — thread scaling</title><text class="ct" x="64" y="16">mem/triad — thread scaling</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">12.5k</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">25.0k</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">37.5k</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">50.0k</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">threads</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">MB/s</text><polyline class="ln s0" points="64.0,145.0 624.0,50.3"/><circle class="pt s0" cx="64.0" cy="145.0" r="3"><title>wsl-dev: 1.00, 18.9k</title></circle><circle class="pt s0" cx="624.0" cy="50.3" r="3"><title>wsl-dev: 6.00, 44.1k</title></circle></svg></div><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>sync/atomic-contended — thread scaling</title><text class="ct" x="64" y="16">sync/atomic-contended — thread scaling</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">37.5</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">75.0</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">112</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">150</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">6.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">threads</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">Mops/s</text><polyline class="ln s0" points="64.0,55.4 624.0,150.0"/><circle class="pt s0" cx="64.0" cy="55.4" r="3"><title>wsl-dev: 1.00, 128</title></circle><circle class="pt s0" cx="624.0" cy="150.0" r="3"><title>wsl-dev: 6.00, 52.6</title></circle></svg></div></div>
+
+<h2>Memory hierarchy</h2><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>Memory latency ladder (L1 → L2 → L3 → DRAM)</title><text class="ct" x="64" y="16">Memory latency ladder (L1 → L2 → L3 → DRAM)</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">50.0</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">100</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">150</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">200</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">32K</text><text class="ax" x="184.0" y="232.0" text-anchor="middle">256K</text><text class="ax" x="264.0" y="232.0" text-anchor="middle">1M</text><text class="ax" x="384.0" y="232.0" text-anchor="middle">8M</text><text class="ax" x="464.0" y="232.0" text-anchor="middle">32M</text><text class="ax" x="544.0" y="232.0" text-anchor="middle">128M</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">512M</text><text class="ax" x="344.0" y="254" text-anchor="middle">working set</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">ns per load</text><polyline class="ln s0" points="64.0,214.1 184.0,210.0 264.0,203.7 384.0,174.5 464.0,107.5 544.0,99.4 624.0,63.3"/><circle class="pt s0" cx="64.0" cy="214.1" r="3"><title>wsl-dev: 32.0, 2.00</title></circle><circle class="pt s0" cx="184.0" cy="210.0" r="3"><title>wsl-dev: 256, 6.38</title></circle><circle class="pt s0" cx="264.0" cy="203.7" r="3"><title>wsl-dev: 1024, 13.1</title></circle><circle class="pt s0" cx="384.0" cy="174.5" r="3"><title>wsl-dev: 8192, 44.1</title></circle><circle class="pt s0" cx="464.0" cy="107.5" r="3"><title>wsl-dev: 32.8k, 115</title></circle><circle class="pt s0" cx="544.0" cy="99.4" r="3"><title>wsl-dev: 131.1k, 124</title></circle><circle class="pt s0" cx="624.0" cy="63.3" r="3"><title>wsl-dev: 524.3k, 162</title></circle></svg></div>
+
+
+
+
+
+
+<h2>Density (instances per machine)</h2><div class="panel"><svg class="chart" viewBox="0 0 640 260" role="img"><title>Per-instance throughput as instances are added</title><text class="ct" x="64" y="16">Per-instance throughput as instances are added</text><line class="grid" x1="64.0" x2="624.0" y1="216.0" y2="216.0"/><text class="ax" x="58.0" y="220.0" text-anchor="end">0</text><line class="grid" x1="64.0" x2="624.0" y1="169.0" y2="169.0"/><text class="ax" x="58.0" y="173.0" text-anchor="end">25.0</text><line class="grid" x1="64.0" x2="624.0" y1="122.0" y2="122.0"/><text class="ax" x="58.0" y="126.0" text-anchor="end">50.0</text><line class="grid" x1="64.0" x2="624.0" y1="75.0" y2="75.0"/><text class="ax" x="58.0" y="79.0" text-anchor="end">75.0</text><line class="grid" x1="64.0" x2="624.0" y1="28.0" y2="28.0"/><text class="ax" x="58.0" y="32.0" text-anchor="end">100</text><text class="ax" x="64.0" y="232.0" text-anchor="middle">1.00</text><text class="ax" x="344.0" y="232.0" text-anchor="middle">2.00</text><text class="ax" x="624.0" y="232.0" text-anchor="middle">3.00</text><text class="ax" x="344.0" y="254" text-anchor="middle">instances</text><text class="ax" x="12" y="122.0" transform="rotate(-90 12 122.0)" text-anchor="middle">% of solo</text><line class="ref" x1="64.0" x2="624.0" y1="46.8" y2="46.8"/><polyline class="ln s0" points="64.0,28.0 344.0,100.0 624.0,133.2"/><circle class="pt s0" cx="64.0" cy="28.0" r="3"><title>wsl-dev: 1.00, 100</title></circle><circle class="pt s0" cx="344.0" cy="100.0" r="3"><title>wsl-dev: 2.00, 61.7</title></circle><circle class="pt s0" cx="624.0" cy="133.2" r="3"><title>wsl-dev: 3.00, 44.0</title></circle></svg></div>
+<div class="scroll"><table><tr><th>run</th><th>workload</th><th>threads / instance</th><th>max instances ≥90% of solo</th></tr>
+<tr><td>wsl-dev</td><td>int/json</td><td>2</td><td><b>1</b></td></tr></table></div>
+
+<h2>Startup and warmup</h2>
+<div class="scroll"><table><tr><th>run</th><th>command</th><th>ready (median)</th><th>warmup until stable</th></tr>
+<tr><td>wsl-dev</td><td><code>./dist/cpubench web serve --addr 127.0.0.1:18181</code></td><td>53.3 ms</td><td>1.00 s</td></tr></table></div>
+
+
+
+<h2>All benchmarks</h2>
+<div class="scroll"><table><tr><th>benchmark</th><th>threads</th><th>unit</th><th>wsl-dev</th></tr>
+<tr><td>sync/atomic-contended</td><td>1</td><td class="muted">Mops/s</td>
+<td><span class="noisy">128</span><span class="cv">±8.4%</span></td>
+</tr><tr><td>sync/atomic-contended</td><td>6</td><td class="muted">Mops/s</td>
+<td><span class="">52.6</span><span class="cv">±2.7%</span></td>
+</tr><tr><td>sync/atomic-local</td><td>1</td><td class="muted">Mops/s</td>
+<td><span class="">157</span><span class="cv">±0.7%</span></td>
+</tr><tr><td>sync/atomic-local</td><td>6</td><td class="muted">Mops/s</td>
+<td><span class="">723</span><span class="cv">±3.1%</span></td>
+</tr><tr><td>sync/mutex</td><td>1</td><td class="muted">Mops/s</td>
+<td><span class="">54.0</span><span class="cv">±2.5%</span></td>
+</tr><tr><td>sync/mutex</td><td>6</td><td class="muted">Mops/s</td>
+<td><span class="">23.1</span><span class="cv">±2.1%</span></td>
+</tr><tr><td>sync/pingpong</td><td>1</td><td class="muted">Ktrips/s</td>
+<td><span class="">17.3</span><span class="cv">±2.2%</span></td>
+</tr><tr><td>sync/pingpong</td><td>6</td><td class="muted">Ktrips/s</td>
+<td><span class="">98.6</span><span class="cv">±4.8%</span></td>
+</tr><tr><td>crypto/aes-gcm</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="noisy">5922</span><span class="cv">±8.0%</span></td>
+</tr><tr><td>crypto/aes-gcm</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="noisy">20.0k</span><span class="cv">±26.4%</span></td>
+</tr><tr><td>crypto/ecdsa-p256</td><td>1</td><td class="muted">ops/s</td>
+<td><span class="">8925</span><span class="cv">±0.4%</span></td>
+</tr><tr><td>crypto/ecdsa-p256</td><td>6</td><td class="muted">ops/s</td>
+<td><span class="noisy">30.6k</span><span class="cv">±7.3%</span></td>
+</tr><tr><td>crypto/rsa2048-sign</td><td>1</td><td class="muted">ops/s</td>
+<td><span class="">1122</span><span class="cv">±1.1%</span></td>
+</tr><tr><td>crypto/rsa2048-sign</td><td>6</td><td class="muted">ops/s</td>
+<td><span class="">3638</span><span class="cv">±4.4%</span></td>
+</tr><tr><td>crypto/sha256</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="">1550</span><span class="cv">±0.5%</span></td>
+</tr><tr><td>crypto/sha256</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="">8417</span><span class="cv">±1.6%</span></td>
+</tr><tr><td>float/fft</td><td>1</td><td class="muted">MFLOP/s</td>
+<td><span class="">2730</span><span class="cv">±0.2%</span></td>
+</tr><tr><td>float/fft</td><td>6</td><td class="muted">MFLOP/s</td>
+<td><span class="noisy">8037</span><span class="cv">±23.7%</span></td>
+</tr><tr><td>float/matmul</td><td>1</td><td class="muted">MFLOP/s</td>
+<td><span class="noisy">5200</span><span class="cv">±9.4%</span></td>
+</tr><tr><td>float/matmul</td><td>6</td><td class="muted">MFLOP/s</td>
+<td><span class="">19.2k</span><span class="cv">±1.0%</span></td>
+</tr><tr><td>float/nbody</td><td>1</td><td class="muted">Minteract/s</td>
+<td><span class="">142</span><span class="cv">±2.6%</span></td>
+</tr><tr><td>float/nbody</td><td>6</td><td class="muted">Minteract/s</td>
+<td><span class="noisy">614</span><span class="cv">±20.7%</span></td>
+</tr><tr><td>int/compress</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="">19.6</span><span class="cv">±0.7%</span></td>
+</tr><tr><td>int/compress</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="">86.2</span><span class="cv">±3.3%</span></td>
+</tr><tr><td>int/decompress</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="">284</span><span class="cv">±4.2%</span></td>
+</tr><tr><td>int/decompress</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="">1269</span><span class="cv">±0.7%</span></td>
+</tr><tr><td>int/hashmap</td><td>1</td><td class="muted">Mops/s</td>
+<td><span class="noisy">42.4</span><span class="cv">±5.3%</span></td>
+</tr><tr><td>int/hashmap</td><td>6</td><td class="muted">Mops/s</td>
+<td><span class="noisy">129</span><span class="cv">±15.3%</span></td>
+</tr><tr><td>int/json</td><td>1</td><td class="muted">Krec/s</td>
+<td><span class="noisy">763</span><span class="cv">±5.8%</span></td>
+</tr><tr><td>int/json</td><td>6</td><td class="muted">Krec/s</td>
+<td><span class="">2044</span><span class="cv">±3.4%</span></td>
+</tr><tr><td>int/regex</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="">32.8</span><span class="cv">±0.7%</span></td>
+</tr><tr><td>int/regex</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="">133</span><span class="cv">±1.9%</span></td>
+</tr><tr><td>int/sort</td><td>1</td><td class="muted">Melem/s</td>
+<td><span class="">17.1</span><span class="cv">±2.4%</span></td>
+</tr><tr><td>int/sort</td><td>6</td><td class="muted">Melem/s</td>
+<td><span class="">78.3</span><span class="cv">±2.0%</span></td>
+</tr><tr><td>mem/copy</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="">18.5k</span><span class="cv">±2.3%</span></td>
+</tr><tr><td>mem/copy</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="noisy">48.5k</span><span class="cv">±12.1%</span></td>
+</tr><tr><td>mem/latency-128M</td><td>1</td><td class="muted">ns</td>
+<td><span class="">124</span><span class="cv">±1.3%</span></td>
+</tr><tr><td>mem/latency-1M</td><td>1</td><td class="muted">ns</td>
+<td><span class="">13.1</span><span class="cv">±2.3%</span></td>
+</tr><tr><td>mem/latency-256K</td><td>1</td><td class="muted">ns</td>
+<td><span class="noisy">6.38</span><span class="cv">±8.3%</span></td>
+</tr><tr><td>mem/latency-32K</td><td>1</td><td class="muted">ns</td>
+<td><span class="">2.00</span><span class="cv">±2.8%</span></td>
+</tr><tr><td>mem/latency-32M</td><td>1</td><td class="muted">ns</td>
+<td><span class="">115</span><span class="cv">±1.7%</span></td>
+</tr><tr><td>mem/latency-512M</td><td>1</td><td class="muted">ns</td>
+<td><span class="">162</span><span class="cv">±3.2%</span></td>
+</tr><tr><td>mem/latency-8M</td><td>1</td><td class="muted">ns</td>
+<td><span class="noisy">44.1</span><span class="cv">±38.7%</span></td>
+</tr><tr><td>mem/triad</td><td>1</td><td class="muted">MB/s</td>
+<td><span class="">18.9k</span><span class="cv">±1.9%</span></td>
+</tr><tr><td>mem/triad</td><td>6</td><td class="muted">MB/s</td>
+<td><span class="">44.1k</span><span class="cv">±4.1%</span></td>
+</tr></table></div>
+<p class="muted">Value is the median of the measured iterations; ± is the coefficient of variation (amber when above 5%). A checksum difference on float kernels can come from fused multiply-add on arm64; on integer kernels it means the result really differs.</p>
+
+<h2>Doctor findings</h2><h3>wsl-dev</h3><div class="panel"><ul class="find"><li><span class="sev warn">warn</span>running under WSL2: results are not representative of a server<div class="muted">→ use for development only; benchmark on bare metal or a real VM</div></li><li><span class="sev ">info</span>SMT on (2 threads/core): thread counts up to 3 use one thread per physical core</li><li><span class="sev warn">warn</span>running under WSL2: results are not representative of a server<div class="muted">→ use for development only; benchmark on bare metal or a real VM</div></li><li><span class="sev ">info</span>SMT on (2 threads/core): thread counts up to 3 use one thread per physical core</li><li><span class="sev warn">warn</span>running under WSL2: results are not representative of a server<div class="muted">→ use for development only; benchmark on bare metal or a real VM</div></li><li><span class="sev ">info</span>SMT on (2 threads/core): thread counts up to 3 use one thread per physical core</li><li><span class="sev warn">warn</span>running under WSL2: results are not representative of a server<div class="muted">→ use for development only; benchmark on bare metal or a real VM</div></li><li><span class="sev ">info</span>SMT on (2 threads/core): thread counts up to 3 use one thread per physical core</li></ul></div>
+
+<h2>Environment</h2>
+<div class="scroll"><table><tr><th></th><th>wsl-dev</th></tr>
+<tr><td>Machine / mode</td><td style="text-align:left">wsl-dev · vm</td></tr><tr><td>CPU</td><td style="text-align:left">13th Gen Intel(R) Core(TM) i7-1360P</td></tr><tr><td>Arch</td><td style="text-align:left">amd64</td></tr><tr><td>Sockets × cores × threads</td><td style="text-align:left">1 × 3 × 2</td></tr><tr><td>Effective CPUs</td><td style="text-align:left">6</td></tr><tr><td>Max MHz</td><td style="text-align:left">2611</td></tr><tr><td>NUMA nodes</td><td style="text-align:left">1</td></tr><tr><td>Page size</td><td style="text-align:left">4K</td></tr><tr><td>Memory</td><td style="text-align:left">9 GB · 0 DIMMs</td></tr><tr><td>Platform</td><td style="text-align:left">· virt wsl</td></tr><tr><td>OS / kernel</td><td style="text-align:left">Ubuntu 24.04 · 6.18.54.1-microsoft-standard-WSL2</td></tr><tr><td>Governor / boost</td><td style="text-align:left">– / –</td></tr><tr><td>Mitigations</td><td style="text-align:left">5 of 19 mitigations active</td></tr><tr><td>Power (avg / max)</td><td style="text-align:left">–</td></tr><tr><td>Tool</td><td style="text-align:left">cpubench dev · go1.26.3</td></tr><tr><td>Run</td><td style="text-align:left">run&#43;web load&#43;density&#43;startup · 2026-10-30 08:07Z</td></tr></table></div>
+</main></body></html>

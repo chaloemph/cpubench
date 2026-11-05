@@ -1,0 +1,38 @@
+{{- if eq .Values.mode "sut" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cpubench.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: cpubench-sut, arch: {{ .Values.arch }}}
+  template:
+    metadata:
+      labels: {app: cpubench-sut, arch: {{ .Values.arch }}}
+    spec:
+      {{- include "cpubench.placement" . | nindent 6 }}
+      containers:
+        - name: sut
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["web", "serve", "--addr", ":8080"]
+          ports: [{containerPort: 8080}]
+          env:
+            {{- include "cpubench.env" . | nindent 12 }}
+          readinessProbe:
+            httpGet: {path: /healthz, port: 8080}
+          resources:
+            {{- include "cpubench.resources" . | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cpubench.name" . }}
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector: {app: cpubench-sut, arch: {{ .Values.arch }}}
+  ports:
+    - {port: 8080, targetPort: 8080, nodePort: {{ .Values.sut.nodePort }}}
+{{- end }}

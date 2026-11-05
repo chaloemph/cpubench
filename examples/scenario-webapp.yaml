@@ -1,0 +1,26 @@
+# Ramp a mixed web-app workload until p99 breaks the SLO.
+#   cpubench web load --scenario examples/scenario-webapp.yaml --target http://sut:8080 --label arm-01
+# Flags given on the command line override values here.
+name: webapp-mix
+target: http://sut:8080
+profile: ramp
+slo:
+  p99_ms: 100
+  error_rate: 0.001
+concurrency: 1024
+keepalive: true
+warmup: 30s
+ramp:
+  start: 1000
+  step: 1000
+  max: 100000
+  step_duration: 30s
+  stop_after_fails: 2
+requests:
+  - {weight: 40, method: GET, path: "/json?id={{rand 1 100000}}"}
+  - {weight: 15, method: GET, path: /html}
+  - {weight: 22, method: GET, path: "/cache?key={{rand 0 9999}}"}
+  - {weight: 3, method: GET, path: "/cache?key={{rand 0 9999}}&write=1"}
+  - {weight: 10, method: GET, path: /gzip, headers: {Accept-Encoding: gzip}}
+  - {weight: 7, method: POST, path: /json/parse, body_file: "@products", headers: {Content-Type: application/json}}
+  - {weight: 3, method: POST, path: /login, body: "user={{rand 1 1000}}", headers: {Content-Type: application/x-www-form-urlencoded}}

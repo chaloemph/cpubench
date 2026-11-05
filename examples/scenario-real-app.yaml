@@ -1,0 +1,27 @@
+# Template for load testing YOUR application (not `cpubench web serve`).
+# Keep the database/cache on the same machine for both runs so only the app
+# tier's CPU changes between the two machines.
+#
+#   cpubench web load --scenario examples/scenario-real-app.yaml --label app-on-arm-01 \
+#     --sut-stats=false --power redfish://admin@arm-01-bmc
+name: my-api
+target: http://app.bench.internal:8080
+profile: ramp
+slo: {p99_ms: 200, error_rate: 0.001}
+concurrency: 1024
+warmup: 60s        # let JIT runtimes (JVM, V8) warm up
+ramp: {start: 200, step: 200, max: 30000, step_duration: 30s}
+requests:
+  - weight: 60
+    method: GET
+    path: "/api/products?page={{rand 1 100}}"
+  - weight: 30
+    method: GET
+    path: "/api/products/{{rand 1 5000}}"
+  - weight: 10
+    method: POST
+    path: /api/orders
+    body_file: order.json          # relative to this file
+    headers:
+      Content-Type: application/json
+      Authorization: Bearer REPLACE_WITH_TEST_TOKEN

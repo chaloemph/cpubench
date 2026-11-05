@@ -1,0 +1,53 @@
+# cpubench node pod on one architecture (no Helm needed). Generated from deploy/helm/cpubench (mode=node).
+# Replace HUB_IP and REGISTRY, then pick the architecture with ARCH:
+#   sed 's/ARCH/arm64/g' node.yaml | kubectl apply -f -     # or ARCH → amd64
+# Running both architectures in one cluster: give the second one nodePort 30081.
+# Optional power: add "--power", "redfish://Administrator@<bmc-ip>" to args (password from secret key bmcPassword).
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpubench-node-ARCH-web
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local # only the node running the pod answers, no extra hop
+  selector: {app: cpubench-node, release: cpubench-ARCH}
+  ports:
+    - {port: 8080, targetPort: web, nodePort: 30080}
+---
+# A pod that joins the hub as "<k8s-node>-k8s" grouped under machine "<k8s-node>",
+# so the report compares it with the same server's native run.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpubench-node-ARCH
+  labels: {app: cpubench-node, arch: ARCH}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: cpubench-node, release: cpubench-ARCH}
+  template:
+    metadata:
+      labels: {app: cpubench-node, release: cpubench-ARCH, arch: ARCH}
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: ARCH
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: node
+          image: "REGISTRY/cpubench:latest"
+          imagePullPolicy: IfNotPresent
+          args: ["node", "--hub", "http://HUB_IP:8090", "--name", "$(NODE_NAME)-k8s", "--machine", "$(NODE_NAME)",
+                 "--addr", "$(HOST_IP)", "--web-port", "8080", "--advertise-port", "30080"]
+          ports: [{containerPort: 8080, name: web}]
+          env:
+            - {name: NODE_NAME, valueFrom: {fieldRef: {fieldPath: spec.nodeName}}}
+            - {name: POD_NAME, valueFrom: {fieldRef: {fieldPath: metadata.name}}}
+            - {name: POD_NAMESPACE, valueFrom: {fieldRef: {fieldPath: metadata.namespace}}}
+            - {name: HOST_IP, valueFrom: {fieldRef: {fieldPath: status.hostIP}}}
+            - {name: CPUBENCH_TOKEN, valueFrom: {secretKeyRef: {name: cpubench, key: token, optional: true}}}
+            - {name: CPUBENCH_BMC_PASSWORD, valueFrom: {secretKeyRef: {name: cpubench, key: bmcPassword, optional: true}}}
+            - {name: CPUBENCH_RESULTS, value: /tmp/results}
+          resources:
+            requests: {cpu: "8", memory: 4Gi}
+            limits: {cpu: "8", memory: 4Gi}

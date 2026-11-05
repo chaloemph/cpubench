@@ -1,0 +1,43 @@
+{{- if eq .Values.mode "hub" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpubench-hub
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: cpubench-hub}
+  template:
+    metadata:
+      labels: {app: cpubench-hub}
+    spec:
+      securityContext: {fsGroup: 65532}
+      containers:
+        - name: hub
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          args: ["hub", "--listen", ":8080", "--dir", "/data"]
+          env:
+            - {name: CPUBENCH_TOKEN, valueFrom: {secretKeyRef: {name: {{ .Values.tokenSecret }}, key: token, optional: true}}}
+          ports: [{containerPort: 8080}]
+          volumeMounts: [{name: data, mountPath: /data}]
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: cpubench-hub}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cpubench-hub
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: {{ .Values.hub.storage }}}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpubench-hub
+spec:
+  selector: {app: cpubench-hub}
+  ports: [{port: 8080, targetPort: 8080}]
+{{- end }}

@@ -1,0 +1,27 @@
+/dist/
+/results/
+/hubdata/
+/report.html
+/report.md
+
+# Reports that `auto` and `compare` write to the working directory
+/cpubench-*.html
+/cpubench-*.md
+/report-*.html
+/report-*.md
+
+# Local secrets (hub token, BMC password)
+.env
+*.env
+
+# Go test output
+*.test
+*.out
+coverage.*
+
+# Editors, OS, agents
+.idea/
+.vscode/
+*.swp
+.DS_Store
+.claude/

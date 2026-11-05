@@ -1,0 +1,45 @@
+# Results hub. Create the token first:
+#   kubectl create secret generic cpubench --from-literal=token=$(openssl rand -hex 16)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpubench-hub
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: cpubench-hub}
+  template:
+    metadata:
+      labels: {app: cpubench-hub}
+    spec:
+      containers:
+        - name: hub
+          image: cpubench:latest
+          args: ["hub", "--listen", ":8080", "--dir", "/data"]
+          env:
+            - {name: CPUBENCH_TOKEN, valueFrom: {secretKeyRef: {name: cpubench, key: token}}}
+          ports: [{containerPort: 8080}]
+          volumeMounts: [{name: data, mountPath: /data}]
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+      securityContext: {fsGroup: 65532}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: cpubench-hub}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cpubench-hub
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpubench-hub
+spec:
+  selector: {app: cpubench-hub}
+  ports: [{port: 8080, targetPort: 8080}]

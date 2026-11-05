@@ -1,0 +1,94 @@
+# Docker layer of the test matrix. See docs/DOCKER.md.
+#
+# One-button (recommended): run a node container on each server; tests start
+# from the hub page like the bare-metal nodes.
+#   HUB=http://<hub-ip>:8090 MACHINE=<machine-name> HOST_IP=<this-server-ip> \
+#     docker compose --profile node up -d                 # bridge network (-p 8080)
+#   HUB=... MACHINE=<machine-name> docker compose --profile node-hostnet up -d   # host network
+#
+# Manual:
+#   server under test:  docker compose --profile sut up -d
+#   load generator:     SUT=http://<server-ip>:8080 docker compose --profile loadgen run --rm loadgen
+#   hub (anywhere):     docker compose --profile hub up -d
+#   micro suite:        docker compose --profile micro run --rm micro
+#
+# Use the same image tag on every architecture; Docker pulls (or you load) the matching arch.
+name: cpubench
+
+x-image: &image ${CPUBENCH_IMAGE:-cpubench:latest}
+
+x-node-env: &node-env
+  CPUBENCH_TOKEN: ${CPUBENCH_TOKEN:-}
+  CPUBENCH_BMC_PASSWORD: ${CPUBENCH_BMC_PASSWORD:-}
+
+x-limits: &limits
+  cpus: ${CPUS:-8}            # CFS quota, like a pod limit
+  mem_limit: ${MEMORY:-8g}
+  # cpuset: "0-7"             # pin to cores of one NUMA node (like K8s static CPU manager)
+  # cpuset_mems: "0"
+
+services:
+  node:
+    profiles: [node]
+    image: *image
+    <<: *limits
+    environment: *node-env
+    ports: ["${WEB_PORT:-8080}:8080"]
+    # HOST_IP: the address the load generator uses; the container's own 172.x IP is not reachable.
+    command: ["node", "--hub", "${HUB:-}", "--name", "${NODE_NAME:-${MACHINE:-}-docker}",
+              "--machine", "${MACHINE}", "--addr", "${HOST_IP:-}",
+              "--web-port", "8080", "--advertise-port", "${WEB_PORT:-8080}", "--power", "${POWER:-}"]
+    restart: unless-stopped
+
+  node-hostnet:
+    profiles: [node-hostnet]
+    image: *image
+    <<: *limits
+    environment: *node-env
+    network_mode: host # no docker-proxy/NAT: compare with the bridge node to see network overhead
+    command: ["node", "--hub", "${HUB:-}", "--name", "${NODE_NAME:-${MACHINE:-}-docker-hostnet}",
+              "--machine", "${MACHINE}", "--web-port", "${WEB_PORT:-8080}", "--power", "${POWER:-}"]
+    restart: unless-stopped
+
+  sut:
+    profiles: [sut]
+    image: *image
+    command: ["web", "serve", "--addr", ":8080"]
+    ports: ["8080:8080"]
+    restart: unless-stopped
+
+  sut-hostnet:
+    profiles: [sut-hostnet]
+    image: *image
+    command: ["web", "serve", "--addr", ":8080"]
+    network_mode: host
+
+  loadgen:
+    profiles: [loadgen]
+    image: *image
+    user: root # write results into the host bind mount
+    network_mode: host
+    volumes: ["./results:/work/results"]
+    command: ["web", "load", "--target", "${SUT:-}", "--endpoint", "mix",
+              "--label", "${LABEL:-sut}", "--upload", "${HUB:-}", "--machine", "${MACHINE:-}"]
+
+  micro:
+    profiles: [micro]
+    image: *image
+    user: root
+    volumes: ["./results:/work/results"]
+    command: ["auto", "--profile", "${PROFILE:-standard}", "--label", "${LABEL:-docker}", "--machine", "${MACHINE:-}",
+              "--upload", "${HUB:-}", "--power", "${POWER:-}"]
+
+  hub:
+    profiles: [hub]
+    image: *image
+    command: ["hub", "--listen", ":8090", "--dir", "/work/hubdata"]
+    environment:
+      CPUBENCH_TOKEN: ${CPUBENCH_TOKEN:-}
+    ports: ["8090:8090"]
+    volumes: ["hubdata:/work/hubdata"]
+    restart: unless-stopped
+
+volumes:
+  hubdata:

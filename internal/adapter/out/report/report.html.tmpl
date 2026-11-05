@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="{{.Lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--text:#1d1d1b;--muted:#6b6a65;--line:#e4e2da;--good:#2f7d32;--good-bg:#e8f3e3;--bad:#b3261e;--bad-bg:#fbe9e7;--warn:#8a5a00;--warn-bg:#fdf1d8;
+--s0:#2b6cb0;--s1:#d0602a;--s2:#2f8f6b;--s3:#8a4fbf;--s4:#b8860b;--s5:#c2417a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b19;--card:#242422;--text:#ecebe6;--muted:#a3a29b;--line:#3a3935;--good:#7cc47f;--good-bg:#1f3320;--bad:#f2948c;--bad-bg:#3d2220;--warn:#f0c46b;--warn-bg:#3a2f15;
+--s0:#6aa5e8;--s1:#f08a55;--s2:#5cc49a;--s3:#b58ae6;--s4:#e0b84a;--s5:#e57aa5}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 64px}h1{font-size:24px;margin:0 0 4px;font-weight:600}h2{font-size:18px;margin:36px 0 12px;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{font-size:15px;margin:20px 0 8px}.muted{color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:20px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.card .l{font-size:12px;color:var(--muted)}.card .v{font-size:22px;font-weight:600;margin:2px 0}.card .s{font-size:12px;color:var(--muted)}
+.card.good .v{color:var(--good)}.card.bad .v{color:var(--bad)}
+.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th{font-weight:600;color:var(--muted);background:var(--card);position:sticky;top:0}
+td:first-child,th:first-child{text-align:left}tr:last-child td{border-bottom:none}.cv{color:var(--muted);font-size:11px;margin-left:4px}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}td.good{background:var(--good-bg)}td.bad{background:var(--bad-bg)}td.warn{background:var(--warn-bg)}
+.noisy{color:var(--warn)}.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:6px;background:var(--bad-bg);color:var(--bad);margin-left:6px}.tag.warn-tag{background:var(--warn-bg);color:var(--warn)}.impl{font-size:11px;color:var(--muted);white-space:nowrap}.impl.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+svg.chart{width:100%;height:auto;display:block}svg .grid{stroke:var(--line);stroke-width:1}svg .axis{stroke:var(--muted);stroke-width:1}svg .ref{stroke:var(--bad);stroke-dasharray:4 4}
+svg text{fill:var(--muted);font-size:11px}svg .ct{fill:var(--text);font-size:13px;font-weight:600}svg .cl{fill:var(--text);font-size:12px}
+svg .ln{fill:none;stroke-width:2}svg .s0{stroke:var(--s0);fill:var(--s0)}svg .s1{stroke:var(--s1);fill:var(--s1)}svg .s2{stroke:var(--s2);fill:var(--s2)}svg .s3{stroke:var(--s3);fill:var(--s3)}svg .s4{stroke:var(--s4);fill:var(--s4)}svg .s5{stroke:var(--s5);fill:var(--s5)}
+svg polyline.ln{fill:none}svg rect.good{fill:var(--good)}svg rect.bad{fill:var(--bad)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin:4px 0 0 64px}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sw.s0{background:var(--s0)}.sw.s1{background:var(--s1)}.sw.s2{background:var(--s2)}.sw.s3{background:var(--s3)}.sw.s4{background:var(--s4)}.sw.s5{background:var(--s5)}
+ul.find{list-style:none;padding:0;margin:0}ul.find li{padding:6px 0;border-bottom:1px solid var(--line)}ul.find li:last-child{border:none}.sev{font-size:11px;font-weight:600;text-transform:uppercase;margin-right:8px}
+code{font-size:12px;background:var(--line);padding:1px 4px;border-radius:4px}
+.verdict{font-size:17px;line-height:1.5;margin:14px 0 2px}
+.callout{background:var(--warn-bg);border-left:4px solid var(--warn);border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0}
+.callout.bad{background:var(--bad-bg);border-left-color:var(--bad)}
+.callout .hd{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:14px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0 28px}
+.toc .hd{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:6px}
+.toc ul{list-style:none;margin:4px 0 8px;padding:0}.toc li{padding:2px 0}.toc a{color:inherit;font-weight:600}
+details>summary{cursor:pointer;color:var(--muted);margin:8px 0}
+.rng{display:block;font-size:11px;color:var(--muted)}td a{color:inherit}
+</style>
+</head>
+<body><main>
+<h1>{{.Title}}</h1>
+{{if .Verdict}}<p class="verdict">{{.Verdict}}</p>{{end}}
+<div class="muted">{{$.T "hdr.generated" .Generated}}{{if .Others}} · {{$.T "hdr.baseline"}} <b>{{.Baseline}}</b>{{end}} · {{$.T "hdr.files" (len .Files)}}</div>
+
+{{with blocking .Caveats}}<div class="callout{{if anyFail .}} bad{{end}}"><div class="hd">{{$.T "callout.title"}}</div>
+<ul class="find">{{range .}}<li><span class="sev {{sevClass .Severity}}">{{.Severity}}</span>{{.Text}}</li>{{end}}</ul></div>{{end}}
+
+<nav class="toc"><div><div class="hd">{{$.T "toc.first"}}</div><ul>
+<li><a href="#conditions">{{$.T "sec.conditions"}}</a> <span class="muted">— {{$.T "hint.conditions"}}</span></li>
+<li><a href="#headline">{{$.T "sec.headline"}}</a> <span class="muted">— {{$.T "hint.headline"}}</span></li>
+{{if .CategoryChart}}<li><a href="#category">{{$.T "sec.category" .Baseline}}</a> <span class="muted">— {{$.T "hint.category"}}</span></li>{{end}}
+{{if .Whole}}<li><a href="#whole">{{$.T "sec.whole" .Baseline}}</a> <span class="muted">— {{$.T "hint.whole"}}</span></li>{{end}}
+{{if .Layers}}<li><a href="#layers">{{$.T "sec.layers"}}</a> <span class="muted">— {{$.T "hint.layers"}}</span></li>{{end}}
+{{if .WebFiles}}<li><a href="#web">{{$.T "sec.web"}}</a> <span class="muted">— {{$.T "hint.web"}}</span></li>{{end}}
+{{if .TCO}}<li><a href="#tco">{{$.T "sec.tco" (num .TCO.TargetRPS) .TCO.Redundancy}}</a> <span class="muted">— {{$.T "hint.tco"}}</span></li>{{end}}
+{{if .Limits}}<li><a href="#limits">{{$.T "sec.limits"}}</a> <span class="muted">— {{$.T "hint.limits"}}</span></li>{{end}}
+</ul></div><div><div class="hd">{{$.T "toc.later"}}</div><ul>
+{{if .ScalingCharts}}<li><a href="#scaling">{{$.T "sec.scaling"}}</a></li>{{end}}
+{{if .LatencyChart}}<li><a href="#latency">{{$.T "sec.latency"}}</a></li>{{end}}
+{{if .StressFiles}}<li><a href="#stress">{{$.T "sec.stress"}}</a> <span class="muted">— {{$.T "hint.stress"}}</span></li>{{end}}
+{{if .PowerFiles}}<li><a href="#power">{{$.T "sec.power"}}</a></li>{{end}}
+{{if .DensityFiles}}<li><a href="#density">{{$.T "sec.density"}}</a></li>{{end}}
+{{if .StartupFiles}}<li><a href="#startup">{{$.T "sec.startup"}}</a></li>{{end}}
+{{if .Rows}}<li><a href="#benchmarks">{{$.T "sec.benchmarks"}}</a> <span class="muted">— {{$.T "hint.benchmarks"}}</span></li>{{end}}
+{{if .Findings}}<li><a href="#doctor">{{$.T "sec.doctor"}}</a> <span class="muted">— {{$.T "hint.doctor"}}</span></li>{{end}}
+{{if .Terms}}<li><a href="#terms">{{$.T "sec.terms"}}</a> <span class="muted">— {{$.T "hint.terms"}}</span></li>{{end}}
+</ul></div></nav>
+
+<h2 id="conditions">{{$.T "sec.conditions"}}</h2>
+<div class="scroll"><table><tr><th></th>{{range .Labels}}<th>{{.}}</th>{{end}}</tr>
+{{range .Env}}<tr><td>{{.Key}}</td>{{range .Values}}<td style="text-align:left">{{.}}</td>{{end}}</tr>{{end}}</table></div>
+{{with notes .Caveats}}<ul class="find" style="margin-top:10px">{{range .}}<li class="muted">{{.Text}}</li>{{end}}</ul>{{end}}
+
+<h2 id="headline">{{$.T "sec.headline"}}</h2>
+<div class="cards">{{range .Cards}}<div class="card {{.Tone}}"><div class="l">{{.Label}}</div><div class="v">{{.Value}}</div><div class="s">{{.Sub}}</div></div>{{end}}</div>
+
+{{if .CategoryChart}}<h2 id="category">{{$.T "sec.category" .Baseline}}</h2><div class="panel">{{.CategoryChart}}</div>
+<div class="scroll"><table><tr><th>{{$.T "tbl.category"}}</th>{{range .Others}}<th>{{.}}</th>{{end}}<th>{{$.T "tbl.care"}}</th></tr>
+{{range .Cats}}<tr><td><a href="#{{.Anchor}}">{{.Category}}</a></td>{{range .Cells}}<td class="{{.Class}}">{{.Text}}{{if .Range}}<span class="rng">{{.Range}}</span>{{end}}</td>{{end}}<td>{{if .Note}}<span class="sev warn">{{.Note}}</span>{{else}}–{{end}}</td></tr>{{end}}</table></div>
+<p class="muted">{{$.T "tbl.geomean"}}</p>{{end}}
+
+{{with .Whole}}<h2 id="whole">{{$.T "sec.whole" $.Baseline}}</h2>
+<div class="scroll"><table><tr><th></th>{{range $.Others}}<th>{{.}}</th>{{end}}</tr>
+{{range .Rows}}<tr><td>{{.Basis}}</td>{{range .Cells}}<td class="{{.Class}}">{{.Text}}</td>{{end}}</tr>{{end}}</table></div>
+<h3>{{$.T "whole.divisors"}}</h3>
+<div class="scroll"><table><tr><th></th>{{range $.Labels}}<th>{{.}}</th>{{end}}</tr>
+{{range .Divisors}}<tr><td>{{.Key}}</td>{{range .Values}}<td>{{.}}</td>{{end}}</tr>{{end}}</table></div>
+<p class="muted">{{$.T "whole.note"}}</p>{{end}}
+
+{{if .WebFiles}}<h2 id="web">{{$.T "sec.web"}}</h2>
+<div class="grid2">{{if .WebChart}}<div class="panel">{{.WebChart}}</div>{{end}}{{if .WebTimeline}}<div class="panel">{{.WebTimeline}}</div>{{end}}</div>
+{{range .WebFiles}}<h3>{{.Label}} — {{.Web.Profile}} · {{.Web.Target}} · {{$.T "web.maxrps"}} <b>{{num .Web.KneeRPS}}</b>{{if .Web.RecoverySec}} · {{$.T "web.recovery" (f1 .Web.RecoverySec)}}{{end}}</h3>
+<div class="scroll"><table><tr><th>{{$.T "web.target"}}</th><th>{{$.T "web.achieved"}}</th><th>p50 ms</th><th>p90</th><th>p99</th><th>p99.9</th><th>{{$.T "col.errors"}}</th><th>{{$.T "web.dropped"}}</th><th>{{$.T "web.sut"}}</th><th>{{$.T "web.watts"}}</th><th>rps/W</th><th>SLO</th></tr>
+{{range .Web.Steps}}<tr><td>{{num .TargetRPS}}</td><td>{{num .AchievedRPS}}</td><td>{{f1 .P50Ms}}</td><td>{{f1 .P90Ms}}</td><td>{{f1 .P99Ms}}</td><td>{{f1 .P999Ms}}</td><td>{{.Errors}}</td><td>{{.Dropped}}</td><td>{{if .SUTCPUPct}}{{f1 .SUTCPUPct}}%{{else}}–{{end}}</td><td>{{if .Watts}}{{f1 .Watts}}{{else}}–{{end}}</td><td>{{if .Watts}}{{f1 (rpsw .AchievedRPS .Watts)}}{{else}}–{{end}}</td><td class="{{if .PassSLO}}good{{else}}bad{{end}}">{{if .PassSLO}}{{$.T "web.pass"}}{{else}}{{$.T "web.fail"}}{{end}}</td></tr>{{end}}
+</table></div>{{end}}{{end}}
+
+{{if .TCO}}<h2 id="tco">{{$.T "sec.tco" (num .TCO.TargetRPS) .TCO.Redundancy}}</h2>
+<div class="scroll"><table><tr><th>{{$.T "tco.server"}}</th><th>{{$.T "tco.maxrps"}}</th><th>{{$.T "tco.watts"}}</th><th>{{$.T "tco.rpspw"}}</th><th>{{$.T "tco.servers"}}</th><th>{{$.T "tco.capex"}}</th><th>{{$.T "tco.energy"}}</th><th>{{$.T "tco.total"}}</th><th>{{$.T "tco.note"}}</th></tr>
+{{range .TCO.Rows}}<tr><td>{{.Label}}</td><td>{{num .KneeRPS}}</td><td>{{f1 .Watts}}</td><td>{{f1 .RPSPerWatt}}</td><td>{{.Servers}}</td><td>{{money .Capex}} {{.Currency}}</td><td>{{money .EnergyPerYr}} {{.Currency}}</td><td><b>{{money .Total}} {{.Currency}}</b> / {{f1 .Years}}{{$.T "unit.year"}}</td><td class="muted">{{.Note}}</td></tr>{{end}}
+</table></div>{{end}}
+
+{{if .ScalingCharts}}<h2 id="scaling">{{$.T "sec.scaling"}}</h2><div class="grid2">{{range .ScalingCharts}}<div class="panel">{{.}}</div>{{end}}</div>{{end}}
+
+{{if .LatencyChart}}<h2 id="latency">{{$.T "sec.latency"}}</h2><div class="panel">{{.LatencyChart}}</div>{{end}}
+{{range $nv := .NUMA}}<h3>{{$.T "numa.title" $nv.Label}}</h3>
+<div class="scroll"><table><tr><th>{{$.T "numa.corner"}}</th>{{range $nv.Nodes}}<th>{{$.T "numa.node" .}}</th>{{end}}</tr>
+{{range $i, $r := $nv.Rows}}<tr><td>{{$.T "numa.node" (index $nv.Nodes $i)}}</td>{{range $r}}<td class="{{.Class}}">{{.Text}}</td>{{end}}</tr>{{end}}</table></div>{{end}}
+
+{{if .StressFiles}}<h2 id="stress">{{$.T "sec.stress"}}</h2>
+<div class="grid2">{{if .StressChart}}<div class="panel">{{.StressChart}}</div>{{end}}{{if .StressMHz}}<div class="panel">{{.StressMHz}}</div>{{end}}</div>
+<div class="scroll"><table><tr><th>{{$.T "col.run"}}</th><th>{{$.T "str.threads"}}</th><th>{{$.T "str.duration"}}</th><th>{{$.T "str.peak"}}</th><th>{{$.T "str.sustained"}}</th><th>{{$.T "str.change"}}</th><th>{{$.T "str.mhz"}}</th><th>{{$.T "str.temp"}}</th><th>{{$.T "str.watts"}}</th><th>{{$.T "str.throttled"}}</th><th>{{$.T "col.errors"}}</th></tr>
+{{range $f := .StressFiles}}{{with $f.Stress}}<tr><td>{{$f.Label}}</td><td>{{.Threads}}</td><td>{{num .DurationSec}}s</td><td>{{num .PeakRate}}</td><td>{{num .SustainedRate}}</td><td class="{{tonePct .DegradationPct}}">{{pct .DegradationPct}}</td><td>{{num .MinMHz}}–{{num .MaxMHz}}</td><td>{{f1 .MaxTempC}}</td><td>{{f1 .AvgWatts}}</td><td>{{f1 (usec .ThrottledUsec)}}s</td><td class="{{if or .Errors .KernelErrors}}bad{{else}}good{{end}}">{{.Errors}}{{if .KernelErrors}} + {{len .KernelErrors}} {{$.T "str.kernel"}}{{end}}</td></tr>{{end}}{{end}}
+</table></div>{{end}}
+
+{{if .PowerFiles}}<h2 id="power">{{$.T "sec.power"}}</h2><div class="panel">{{.PowerChart}}</div>
+<div class="scroll"><table><tr><th>{{$.T "col.run"}}</th>{{range (index .PowerFiles 0).PowerCurve.Levels}}<th>{{num .UtilPct}}%</th>{{end}}</tr>
+{{range .PowerFiles}}<tr><td>{{.Label}}</td>{{range .PowerCurve.Levels}}<td>{{f1 .Watts}} W</td>{{end}}</tr>{{end}}</table></div>{{end}}
+
+{{if .DensityFiles}}<h2 id="density">{{$.T "sec.density"}}</h2><div class="panel">{{.DensityChart}}</div>
+<div class="scroll"><table><tr><th>{{$.T "col.run"}}</th><th>{{$.T "den.workload"}}</th><th>{{$.T "den.threads"}}</th><th>{{$.T "den.max"}}</th></tr>
+{{range .DensityFiles}}<tr><td>{{.Label}}</td><td>{{.Density.Workload}}</td><td>{{.Density.GroupSize}}</td><td><b>{{.Density.MaxInstances}}</b></td></tr>{{end}}</table></div>{{end}}
+
+{{if .StartupFiles}}<h2 id="startup">{{$.T "sec.startup"}}</h2>
+<div class="scroll"><table><tr><th>{{$.T "col.run"}}</th><th>{{$.T "sta.command"}}</th><th>{{$.T "sta.ready"}}</th><th>{{$.T "sta.warmup"}}</th></tr>
+{{range .StartupFiles}}<tr><td>{{.Label}}</td><td><code>{{.Startup.Command}}</code></td><td>{{num .Startup.ReadyMedianMs}} ms</td><td>{{num .Startup.WarmupSec}} s</td></tr>{{end}}</table></div>{{end}}
+
+{{if .Layers}}<h2 id="layers">{{$.T "sec.layers"}}</h2>
+<div class="scroll"><table><tr><th>{{$.T "lay.machine"}}</th><th>{{$.T "col.run"}}</th><th>{{$.T "lay.cmp"}}</th><th>{{$.T "lay.micro"}}</th><th>{{$.T "lay.web"}}</th></tr>
+{{range $l := .Layers}}{{range $label, $v := $l.MicroPct}}<tr><td>{{$l.Machine}}</td><td>{{$label}}</td><td>{{$l.Base}} <span class="muted">({{$l.BaseLayer}})</span></td><td class="{{tonePct $v}}">{{pct $v}}</td><td>{{get $l.WebPct $label}}</td></tr>{{end}}{{end}}
+</table></div>{{end}}
+
+{{if .Rows}}<h2 id="benchmarks">{{$.T "sec.benchmarks"}}</h2>
+{{range .Groups}}<section id="{{.Anchor}}"><h3>{{.Category}}</h3>
+<details><summary>{{$.T "bm.show" (len .Rows)}}</summary>
+<div class="scroll"><table><tr><th>{{$.T "bm.name"}}</th><th>{{$.T "bm.threads"}}</th><th>{{$.T "bm.unit"}}</th>{{range $.Labels}}<th>{{if and $.Others (eq . $.Baseline)}}{{$.T "bm.base" .}}{{else}}{{.}}{{end}}</th>{{end}}{{range $.Others}}<th>{{$.T "bm.vsbase" .}}</th>{{end}}</tr>
+{{range .Rows}}<tr><td>{{.Name}}{{if .Mismatch}}<span class="tag" title="{{$.T "bm.checksum_tip"}}">{{$.T "bm.checksum"}}</span>{{end}}{{if .BackendDiffers}}<span class="tag warn-tag" title="{{$.T "bm.impl_tip"}}">{{$.T "bm.impl"}}</span>{{end}}</td><td>{{.Threads}}</td><td class="muted">{{.Unit}}</td>
+{{range .Cells}}<td><span class="{{if .Noisy}}noisy{{end}}">{{.Value}}</span>{{if .CV}}<span class="cv">±{{.CV}}</span>{{end}}{{if .Backend}}<div class="impl{{if .Fallback}} warn{{end}}">{{.Backend}}</div>{{end}}</td>{{end}}
+{{range .Speedups}}<td class="{{.Class}}">{{.Text}}</td>{{end}}</tr>{{end}}</table></div></details></section>{{end}}
+<p class="muted">{{$.T "bm.note"}}</p>
+<script>
+// A link from the category table opens the folded rows it points at.
+function openTarget(){var t=location.hash&&document.getElementById(decodeURIComponent(location.hash.slice(1)));var d=t&&t.querySelector("details");if(d){d.open=true;t.scrollIntoView()}}
+addEventListener("hashchange",openTarget);openTarget();
+</script>{{end}}
+
+{{if .Findings}}<h2 id="doctor">{{$.T "sec.doctor"}}</h2><details{{if hasWarn .Findings}} open{{end}}><summary>{{$.T "doc.show" (nfind .Findings)}}</summary>{{range .Findings}}<h3>{{.Label}}</h3><div class="panel"><ul class="find">{{range .Findings}}<li><span class="sev {{sevClass .Severity}}">{{.Severity}}</span>{{.Message}}{{if .Fix}}<div class="muted">→ {{.Fix}}</div>{{end}}</li>{{end}}</ul></div>{{end}}</details>{{end}}
+
+{{if .Limits}}<h2 id="limits">{{$.T "sec.limits"}}</h2>
+<div class="panel"><ul class="find">{{range .Limits}}<li>{{.}}</li>{{end}}</ul></div>{{end}}
+
+{{if .Terms}}<h2 id="terms">{{$.T "sec.terms"}}</h2>
+{{range .Terms}}<div class="panel"><b>{{.Name}}</b><p>{{.Intro}}</p><ul class="find">{{range .Points}}<li>{{.}}</li>{{end}}</ul></div>{{end}}{{end}}
+</main></body></html>

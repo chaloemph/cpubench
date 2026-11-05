@@ -1,0 +1,33 @@
+# Micro suite as a Kubernetes Job on one architecture.
+# Guaranteed QoS (requests == limits, whole CPUs) so the kubelet static CPU
+# manager can give the pod exclusive cores. Pick the architecture with ARCH:
+#
+#   sed 's/ARCH/arm64/g' micro-job.yaml | kubectl apply -f - && kubectl logs -f job/cpubench-micro-arm64
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cpubench-micro-ARCH
+  labels: {app: cpubench}
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels: {app: cpubench}
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/arch: ARCH
+      containers:
+        - name: cpubench
+          image: cpubench:latest
+          args: ["run", "--label", "$(NODE_NAME)-k8s", "--machine", "$(NODE_NAME)",
+                 "--threads", "1,4,8", "--upload", "http://cpubench-hub:8080"]
+          env:
+            - {name: NODE_NAME, valueFrom: {fieldRef: {fieldPath: spec.nodeName}}}
+            - {name: POD_NAME, valueFrom: {fieldRef: {fieldPath: metadata.name}}}
+            - {name: POD_NAMESPACE, valueFrom: {fieldRef: {fieldPath: metadata.namespace}}}
+            - {name: CPUBENCH_TOKEN, valueFrom: {secretKeyRef: {name: cpubench, key: token, optional: true}}}
+          resources:
+            requests: {cpu: "8", memory: 4Gi}
+            limits: {cpu: "8", memory: 4Gi}

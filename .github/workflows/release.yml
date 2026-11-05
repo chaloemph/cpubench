@@ -1,0 +1,27 @@
+name: release
+
+# Push a tag such as v0.1.0 to publish static binaries for linux/amd64 and
+# linux/arm64 with a SHA256SUMS file.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # git describe needs the tags for the version string
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+      - run: make build-all
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes dist/cpubench-linux-amd64 dist/cpubench-linux-arm64 dist/SHA256SUMS

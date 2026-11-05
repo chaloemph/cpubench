@@ -1,0 +1,10 @@
+# Spike: normal load, a sudden 3x burst, then normal again; reports recovery time.
+#   cpubench web load --scenario examples/scenario-spike.yaml --target http://sut:8080 --rate 8000 --label arm-01-spike
+name: spike
+profile: spike
+rate: 8000
+spike: {peak: 24000, before: 60s, hold: 30s, after: 120s}
+slo: {p99_ms: 100, error_rate: 0.001}
+concurrency: 2048
+requests:
+  - {weight: 1, method: GET, path: "/json?id={{rand 1 100000}}"}

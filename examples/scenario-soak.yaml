@@ -1,0 +1,11 @@
+# Soak: hold 70-80% of the measured knee for hours; watch p99 drift and errors.
+#   cpubench web load --scenario examples/scenario-soak.yaml --target http://sut:8080 --rate 15000 --label arm-01-soak
+name: soak
+profile: constant
+rate: 15000        # set to ~75% of the max RPS @ SLO from a ramp run
+duration: 4h
+slo: {p99_ms: 100, error_rate: 0.001}
+concurrency: 1024
+warmup: 60s
+requests:
+  - {weight: 1, method: GET, path: "/json?id={{rand 1 100000}}"}

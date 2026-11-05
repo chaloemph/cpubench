@@ -1,0 +1,50 @@
+image:
+  repository: cpubench
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Which nodes to run on: amd64 or arm64. Required for every mode except hub;
+# install one release per architecture to compare them.
+arch: ""
+
+# node   - pod that joins the hub; start tests from the hub's buttons (recommended)
+# auto   - one-shot `cpubench auto` (Job)
+# micro  - micro-benchmark suite (Job)
+# stress - sustained all-core stress (Job)
+# sut    - web target for `cpubench web load` (Deployment + NodePort Service)
+# hub    - results hub (Deployment + Service + PVC)
+mode: node
+
+# Whole CPUs with requests == limits → Guaranteed QoS (exclusive cores with the static CPU manager).
+cpu: "8"
+memory: 4Gi
+
+# Where pods upload results / poll for jobs. For a hub outside the cluster
+# (e.g. on the load generator) use its address: http://10.0.0.9:8090
+hubURL: http://cpubench-hub:8080
+# Secret holding the hub upload token under key "token" (optional).
+tokenSecret: cpubench
+
+# Pin to one Kubernetes node (its kubernetes.io/hostname); empty = any node of this arch.
+nodeName: ""
+
+node:
+  # Power source read from inside the pod, e.g. redfish://Administrator@10.0.0.21
+  # (BMC password from secret key "bmcPassword"). Empty = no power data.
+  power: ""
+  # NodePort the load generator uses for web tests; use a different one per release.
+  webNodePort: 30080
+
+auto:
+  profile: standard
+
+micro:
+  threads: "1,4,8"
+  extraArgs: []
+stress:
+  duration: 30m
+  extraArgs: []
+sut:
+  nodePort: 30080
+hub:
+  storage: 1Gi

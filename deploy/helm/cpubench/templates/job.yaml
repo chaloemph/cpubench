@@ -1,0 +1,29 @@
+{{- if or (eq .Values.mode "micro") (eq .Values.mode "stress") (eq .Values.mode "auto") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cpubench.name" . }}
+  labels: {app: cpubench, arch: {{ .Values.arch }}}
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      {{- include "cpubench.placement" . | nindent 6 }}
+      containers:
+        - name: cpubench
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if eq .Values.mode "micro" }}
+          args: ["run", "--label", "$(NODE_NAME)-k8s", "--machine", "$(NODE_NAME)", "--threads", {{ .Values.micro.threads | quote }}, "--upload", {{ .Values.hubURL | quote }}{{ range .Values.micro.extraArgs }}, {{ . | quote }}{{ end }}]
+          {{- else if eq .Values.mode "auto" }}
+          args: ["auto", "--profile", {{ .Values.auto.profile | quote }}, "--label", "$(NODE_NAME)-k8s", "--machine", "$(NODE_NAME)", "--upload", {{ .Values.hubURL | quote }}{{ with .Values.node.power }}, "--power", {{ . | quote }}{{ end }}]
+          {{- else }}
+          args: ["stress", "--label", "$(NODE_NAME)-k8s", "--machine", "$(NODE_NAME)", "--duration", {{ .Values.stress.duration | quote }}, "--upload", {{ .Values.hubURL | quote }}{{ range .Values.stress.extraArgs }}, {{ . | quote }}{{ end }}]
+          {{- end }}
+          env:
+            {{- include "cpubench.env" . | nindent 12 }}
+          resources:
+            {{- include "cpubench.resources" . | nindent 12 }}
+{{- end }}

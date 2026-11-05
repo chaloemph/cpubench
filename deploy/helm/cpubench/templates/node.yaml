@@ -1,0 +1,44 @@
+{{- if eq .Values.mode "node" }}
+# A pod that joins the hub as "<k8s-node>-k8s" grouped under machine "<k8s-node>",
+# so the report compares it with the same server's native run.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cpubench.name" . }}
+  labels: {app: cpubench-node, arch: {{ .Values.arch }}}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: cpubench-node, release: {{ .Release.Name }}}
+  template:
+    metadata:
+      labels: {app: cpubench-node, release: {{ .Release.Name }}, arch: {{ .Values.arch }}}
+    spec:
+      {{- include "cpubench.placement" . | nindent 6 }}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: node
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["node", "--hub", {{ .Values.hubURL | quote }}, "--name", "$(NODE_NAME)-k8s", "--machine", "$(NODE_NAME)",
+                 "--addr", "$(HOST_IP)", "--web-port", "8080", "--advertise-port", {{ .Values.node.webNodePort | quote }}
+                 {{- with .Values.node.power }}, "--power", {{ . | quote }}{{ end }}]
+          ports: [{containerPort: 8080, name: web}]
+          env:
+            {{- include "cpubench.env" . | nindent 12 }}
+            - {name: CPUBENCH_RESULTS, value: /tmp/results}
+          resources:
+            {{- include "cpubench.resources" . | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cpubench.name" . }}-web
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local # only the node running the pod answers, no extra hop
+  selector: {app: cpubench-node, release: {{ .Release.Name }}}
+  ports:
+    - {port: 8080, targetPort: web, nodePort: {{ .Values.node.webNodePort }}}
+{{- end }}

@@ -1,0 +1,22 @@
+# Keeps a machine connected to the cpubench hub so tests start from its buttons.
+#   sudo install -m755 cpubench-linux-$(dpkg --print-architecture) /usr/local/bin/cpubench
+#   sudo install -m600 /dev/null /etc/cpubench.env   # then edit: CPUBENCH_TOKEN=..., CPUBENCH_BMC_PASSWORD=...
+#   sudo cp cpubench-node.service /etc/systemd/system/ && sudo systemctl enable --now cpubench-node
+# Edit --hub and --power below. Runs as root to read DIMM details, set CPU affinity freely and use ipmi://local.
+[Unit]
+Description=cpubench node (connects to the cpubench hub)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/cpubench.env
+Environment=CPUBENCH_RESULTS=/var/lib/cpubench/results
+StateDirectory=cpubench
+WorkingDirectory=/var/lib/cpubench
+ExecStart=/usr/local/bin/cpubench node --hub http://HUB_IP:8090 --name %H --power redfish://admin@BMC_IP
+Restart=always
+RestartSec=10
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+# cpubench hub: collects results and runs tests on connected nodes from a web page.
+#   sudo install -m755 cpubench-linux-$(dpkg --print-architecture) /usr/local/bin/cpubench
+#   echo "CPUBENCH_TOKEN=$(openssl rand -hex 16)" | sudo tee /etc/cpubench-hub.env && sudo chmod 600 /etc/cpubench-hub.env
+#   sudo cp cpubench-hub.service /etc/systemd/system/ && sudo systemctl enable --now cpubench-hub
+[Unit]
+Description=cpubench hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/cpubench-hub.env
+DynamicUser=yes
+StateDirectory=cpubench-hub
+ExecStart=/usr/local/bin/cpubench hub --listen :8090 --dir /var/lib/cpubench-hub
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

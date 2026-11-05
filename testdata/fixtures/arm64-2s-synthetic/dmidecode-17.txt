@@ -1,0 +1,180 @@
+Memory Device
+	Size: 32 GB
+	Locator: DIMM000
+	Bank Locator: SOCKET 0 CHANNEL 0 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM010
+	Bank Locator: SOCKET 0 CHANNEL 1 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM020
+	Bank Locator: SOCKET 0 CHANNEL 2 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM030
+	Bank Locator: SOCKET 0 CHANNEL 3 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM040
+	Bank Locator: SOCKET 0 CHANNEL 4 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM050
+	Bank Locator: SOCKET 0 CHANNEL 5 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM060
+	Bank Locator: SOCKET 0 CHANNEL 6 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM070
+	Bank Locator: SOCKET 0 CHANNEL 7 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM100
+	Bank Locator: SOCKET 1 CHANNEL 0 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM110
+	Bank Locator: SOCKET 1 CHANNEL 1 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM120
+	Bank Locator: SOCKET 1 CHANNEL 2 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM130
+	Bank Locator: SOCKET 1 CHANNEL 3 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM140
+	Bank Locator: SOCKET 1 CHANNEL 4 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM150
+	Bank Locator: SOCKET 1 CHANNEL 5 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM160
+	Bank Locator: SOCKET 1 CHANNEL 6 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: 32 GB
+	Locator: DIMM170
+	Bank Locator: SOCKET 1 CHANNEL 7 DIMM 0
+	Type: DDR4
+	Speed: 2933 MT/s
+	Configured Memory Speed: 2933 MT/s
+	Rank: 2
+	Manufacturer: SYNTH
+	Part Number: SYNTH
+
+Memory Device
+	Size: No Module Installed
+	Locator: DIMM001
+

@@ -1,0 +1,1 @@
+{"customer_id": {{rand 1 50000}}, "items": [{"sku": "SKU-{{rand 1 5000}}", "qty": 2}, {"sku": "SKU-{{rand 1 5000}}", "qty": 1}], "currency": "THB"}

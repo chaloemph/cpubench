@@ -1,0 +1,13 @@
+dist
+results
+hubdata
+report.html
+report.md
+.git
+.claude
+
+.env
+*.env
+cpubench-*.html
+report-*.html
+report-*.md

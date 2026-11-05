@@ -1,0 +1,21 @@
+# On-prem cost model for `cpubench compare --tco examples/tco.yaml`.
+# Keys under servers must match the result labels you compare.
+# Prices here are placeholders: replace them with your quotes.
+target_rps: 20000   # peak load the fleet must serve within the SLO
+redundancy: 1       # N+1
+
+servers:
+  x86-01:
+    server_price: 450000
+    currency: THB
+    lifespan_years: 5
+    power_rate_per_kwh: 4.5
+    pue: 1.5          # data-centre cooling overhead
+    # watts: 380      # optional: override measured power at the knee
+
+  arm-01:
+    server_price: 520000
+    currency: THB
+    lifespan_years: 5
+    power_rate_per_kwh: 4.5
+    pue: 1.5

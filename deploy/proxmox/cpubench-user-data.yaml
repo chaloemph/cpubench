@@ -1,0 +1,19 @@
+#cloud-config
+# Cloud-init for benchmark VMs: installs cpubench for the VM's architecture
+# from your hub/file server. Copy to /var/lib/vz/snippets/ on the Proxmox node
+# and pass SNIPPET=local:snippets/cpubench-user-data.yaml to create-bench-vm.sh.
+package_update: true
+packages: [numactl, dmidecode, ethtool, linux-tools-common]
+write_files:
+  - path: /etc/sysctl.d/90-cpubench.conf
+    content: |
+      net.core.somaxconn = 65535
+      net.ipv4.ip_local_port_range = 1024 65535
+      net.ipv4.tcp_tw_reuse = 1
+runcmd:
+  - sysctl --system
+  - |
+    ARCH=$(dpkg --print-architecture)   # amd64 or arm64
+    # Change this URL to wherever you publish dist/cpubench-linux-*.
+    curl -fsSL -o /usr/local/bin/cpubench "http://files.example.internal/cpubench/cpubench-linux-${ARCH}"
+    chmod +x /usr/local/bin/cpubench

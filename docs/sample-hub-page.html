@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>cpubench hub</title>
+
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--text:#1d1d1b;--muted:#6b6a65;--line:#e4e2da;--accent:#2b6cb0;--good:#2f7d32;--bad:#b3261e;--warn:#8a5a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b19;--card:#242422;--text:#ecebe6;--muted:#a3a29b;--line:#3a3935;--accent:#6aa5e8;--good:#7cc47f;--bad:#f2948c;--warn:#f0c46b}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}main{max-width:1150px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}h2{font-size:17px;font-weight:600;margin:28px 0 10px}
+.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:middle}
+tr:last-child td{border-bottom:none}th{color:var(--muted);font-weight:600}.muted{color:var(--muted)}
+button,select,input{font:inherit;font-size:13px}button{padding:5px 12px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}button:hover{border-color:var(--accent)}
+select,input[type=text]{padding:5px 8px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+form.inline{display:inline}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.on{color:var(--good)}.off{color:var(--muted)}.st-done{color:var(--good)}.st-failed{color:var(--bad)}.st-running{color:var(--accent)}.st-canceled,.st-waiting,.st-queued{color:var(--warn)}
+code{font-size:12px;background:var(--line);padding:1px 5px;border-radius:4px}a{color:var(--accent)}
+</style></head><body><main>
+<h1>cpubench hub</h1>
+<div class="muted">Connect a machine with <code>cpubench node --hub http://this-hub:8080 --token …</code>, then press a button.</div>
+
+<h2>Machines</h2>
+<div class="scroll"><table>
+<tr><th>node</th><th>status</th><th>arch</th><th>CPU</th><th>address</th><th>power</th><th>current job</th><th>run test</th></tr>
+<tr>
+<td><b>node-a</b></td>
+<td class="on">online</td>
+<td>amd64</td><td>13th Gen Intel(R) Core(TM) i7-1360P</td><td>127.0.0.1:18081</td><td>yes</td>
+<td><span class="muted">idle</span></td>
+<td><form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-a"><input type="hidden" name="profile" value="smoke"><button >smoke</button></form> <form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-a"><input type="hidden" name="profile" value="quick"><button >quick</button></form> <form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-a"><input type="hidden" name="profile" value="standard"><button class="primary">standard</button></form> <form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-a"><input type="hidden" name="profile" value="full"><button >full</button></form> </td>
+</tr><tr>
+<td><b>node-b</b></td>
+<td class="on">online</td>
+<td>amd64</td><td>13th Gen Intel(R) Core(TM) i7-1360P</td><td>127.0.0.1:18082</td><td><span class="muted">no</span></td>
+<td><span class="muted">idle</span></td>
+<td><form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-b"><input type="hidden" name="profile" value="smoke"><button >smoke</button></form> <form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-b"><input type="hidden" name="profile" value="quick"><button >quick</button></form> <form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-b"><input type="hidden" name="profile" value="standard"><button class="primary">standard</button></form> <form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="node-b"><input type="hidden" name="profile" value="full"><button >full</button></form> </td>
+</tr>
+</table></div>
+
+<div class="bar">
+<form class="inline" method="post" action="/ui/run"><input type="hidden" name="node" value="*">
+<select name="profile"><option >smoke</option><option >quick</option><option selected>standard</option><option >full</option></select>
+<button class="primary">Run on every online machine</button></form>
+<a href="/compare?latest=1"><button type="button">Compare latest of every machine</button></a>
+</div>
+
+<h2>Web test</h2>
+<div class="panel"><form method="post" action="/ui/web" class="bar" style="margin:0">
+<label>Server <select name="sut"><option>node-a</option><option>node-b</option></select></label>
+<label>Load generator <select name="loadgen"><option>node-a</option><option>node-b</option></select></label>
+<select name="profile"><option >smoke</option><option selected>quick</option><option >standard</option><option >full</option></select>
+<button class="primary">Run web test</button>
+<span class="muted">The server runs <code>web serve</code>; the load generator ramps until p99 breaks 100 ms. Use a separate machine as load generator.</span>
+</form></div>
+
+<h2>Jobs</h2>
+<div class="scroll"><table><tr><th>job</th><th>machine</th><th>type</th><th>profile</th><th>state</th><th>stage / message</th><th>updated</th><th>result</th><th></th></tr>
+<tr><td class="muted">load-1030-085141-7a96c416</td><td>node-b</td><td>web-load</td><td>smoke</td>
+<td class="st-done">done</td><td></td>
+<td>15:51:56</td><td><a href="/compare?id=node-a-20261030T085142-5b607e">report</a></td>
+<td></td></tr><tr><td class="muted">serve-1030-085141-f325f823</td><td>node-a</td><td>web-serve</td><td>smoke</td>
+<td class="st-done">done (stopping)</td><td> <span class="muted">server stopped after the load test</span></td>
+<td>15:51:56</td><td></td>
+<td></td></tr><tr><td class="muted">auto-1030-085101-f4868e17</td><td>node-b</td><td>auto</td><td>smoke</td>
+<td class="st-done">done</td><td></td>
+<td>15:51:23</td><td><a href="/compare?id=node-b-20261030T085101-f78dc7">report</a></td>
+<td></td></tr><tr><td class="muted">auto-1030-085101-4e063155</td><td>node-a</td><td>auto</td><td>smoke</td>
+<td class="st-done">done</td><td></td>
+<td>15:51:37</td><td><a href="/compare?id=node-a-20261030T085101-d77962">report</a></td>
+<td></td></tr>
+</table></div>
+
+<h2>Results</h2>
+<form action="/compare" method="get">
+<div class="bar"><label>Baseline <input type="text" name="baseline" placeholder="label of the machine in production"></label>
+<label><input type="radio" name="format" value="" checked> HTML</label><label><input type="radio" name="format" value="md"> Markdown</label>
+<button type="submit">Compare selected</button></div>
+<div class="scroll"><table><tr><th></th><th>label</th><th>machine</th><th>arch</th><th>CPU</th><th>mode</th><th>command</th><th>created (UTC)</th><th></th></tr>
+<tr><td><input type="checkbox" name="id" value="node-a-20261030T085142-5b607e"></td><td>node-a</td><td>node-a</td><td>amd64</td><td>13th Gen Intel(R) Core(TM) i7-1360P</td><td>vm</td><td>web load</td><td>2026-10-30 08:51</td><td><a href="/api/results/node-a-20261030T085142-5b607e">json</a></td></tr>
+<tr><td><input type="checkbox" name="id" value="node-a-20261030T085101-d77962"></td><td>node-a</td><td>node-a</td><td>amd64</td><td>13th Gen Intel(R) Core(TM) i7-1360P</td><td>vm</td><td>auto smoke</td><td>2026-10-30 08:51</td><td><a href="/api/results/node-a-20261030T085101-d77962">json</a></td></tr>
+<tr><td><input type="checkbox" name="id" value="node-b-20261030T085101-f78dc7"></td><td>node-b</td><td>node-b</td><td>amd64</td><td>13th Gen Intel(R) Core(TM) i7-1360P</td><td>vm</td><td>auto smoke</td><td>2026-10-30 08:51</td><td><a href="/api/results/node-b-20261030T085101-f78dc7">json</a></td></tr>
+
+</table></div></form></main></body></html>

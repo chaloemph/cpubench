@@ -1,0 +1,43 @@
+# Web target for `cpubench web load`, pinned to one architecture:
+#   sed 's/ARCH/amd64/g' web-sut.yaml | kubectl apply -f -     # or ARCH → arm64
+# Load it from outside the node (or another node) through the NodePort:
+#   cpubench web load --target http://<node-ip>:30080 --label <node>-k8s
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpubench-sut-ARCH
+  labels: {app: cpubench-sut}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: cpubench-sut, arch: ARCH}
+  template:
+    metadata:
+      labels: {app: cpubench-sut, arch: ARCH}
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: ARCH
+      containers:
+        - name: sut
+          image: cpubench:latest
+          args: ["web", "serve", "--addr", ":8080"]
+          ports: [{containerPort: 8080}]
+          env:
+            - {name: NODE_NAME, valueFrom: {fieldRef: {fieldPath: spec.nodeName}}}
+            - {name: POD_NAME, valueFrom: {fieldRef: {fieldPath: metadata.name}}}
+          readinessProbe:
+            httpGet: {path: /healthz, port: 8080}
+          resources:
+            requests: {cpu: "8", memory: 2Gi}
+            limits: {cpu: "8", memory: 2Gi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpubench-sut-ARCH
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local # keep traffic on the node that runs the pod
+  selector: {app: cpubench-sut, arch: ARCH}
+  ports:
+    - {port: 8080, targetPort: 8080, nodePort: 30080}
