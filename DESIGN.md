@@ -57,6 +57,7 @@ internal/
 | ส่วน | วิธี |
 |---|---|
 | micro | warmup 1 รอบ (และเป็นการ first-touch memory ด้วย) จากนั้นวัด N รอบโดยปล่อยทุก thread พร้อมกันด้วย barrier แล้วรายงาน median และ CV% (เกิน 5% จะ flag ว่า noisy) |
+| LZMA | `workload/lzma`: range coder, model และ state machine ตาม format LZMA1, match finder แบบ hash chain (ตาราง hash ขนาดตาม dictionary เหมือน HC4 ของ 7-Zip, depth 32, nice 32), greedy parsing พร้อม lazy หนึ่งขั้น และไม่มี end marker ข้อมูลเข้า (`lzInput`) สร้างแบบ benchmark ของ 7-Zip `TestStreamIsPinned` ตรึง CRC ของ stream ไว้ให้ x86-64 กับ arm64 ได้ byte เดียวกัน และ `TestDecodesXZ` ถอด stream ที่ xz สร้าง |
 | memory BW | strong scaling: working set รวมคงที่แล้วแบ่งให้แต่ละ thread และแต่ละ thread first-touch ส่วนของตัวเอง หน้า memory จึงอยู่ NUMA node เดียวกับ thread |
 | NUMA matrix | สร้าง pointer chain บน thread ที่ pin ไว้ใน node M (first-touch) แล้ว chase จาก node C |
 | web | open model: request แต่ละตัวมีเวลาส่งที่กำหนดไว้ (intended time) และวัด latency จากเวลานั้น จึงไม่เกิด coordinated omission ถ้า load-gen ตามไม่ทันเกิน deadline จะนับเป็น dropped และถือว่า SLO fail |

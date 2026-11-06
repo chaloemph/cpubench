@@ -82,11 +82,19 @@ workload แบบ throughput ชุดเดียวกัน และเป�
 
 | หมวด | Benchmark | แทนอะไร |
 |---|---|---|
-| integer | `int/json`, `int/regex`, `int/sort`, `int/hashmap`, `int/compress`, `int/decompress` | logic ของแอปทั่วไป: parse, จับคู่, map, บีบอัด |
+| integer | `int/json`, `int/regex`, `int/sort`, `int/hashmap`, `int/compress`, `int/decompress`, `int/lzma-compress`, `int/lzma-decompress` | logic ของแอปทั่วไป: parse, จับคู่, map, บีบอัด (deflate แบบ gzip และ LZMA แบบ 7-Zip/xz) |
 | float | `float/matmul`, `float/nbody`, `float/fft` | โค้ดคำนวณตัวเลข |
 | crypto | `crypto/aes-gcm`, `crypto/sha256`, `crypto/ecdsa-p256`, `crypto/rsa2048-sign` | เข้ารหัสข้อมูล TLS, hash, TLS handshake |
 | memory | `mem/triad`, `mem/copy` (bandwidth), `mem/latency-32K … 512M` (pointer chase), NUMA matrix (`standard`/`full`) | พฤติกรรมของ cache และ DRAM, ต้นทุนข้าม node |
 | concurrency | `sync/atomic-local`, `sync/atomic-contended`, `sync/mutex`, `sync/pingpong` | โค้ดที่ใช้ lock หนัก, การสื่อสารข้าม core |
+
+`int/lzma-compress` และ `int/lzma-decompress` ใช้ LZMA ที่เขียนด้วย Go ใน cpubench เอง (dictionary 16MB,
+lc=3 lp=0 pb=2 เหมือนค่าเริ่มต้นของ 7-Zip และ xz) กับข้อมูลสังเคราะห์แบบเดียวกับ benchmark ในตัวของ
+7-Zip คือมีช่วง byte สุ่มคั่นระหว่างข้อมูลที่ซ้ำของเดิม ระยะของข้อมูลที่ซ้ำกระจายไปทั่วทั้ง dictionary
+จึงวัดทั้ง range coder (branch ที่ทายยาก) และการอ่าน memory แบบสุ่ม ซึ่งเป็นสองอย่างที่ทำให้คะแนน
+7-Zip ต่างกันมากระหว่าง CPU แต่ตัวเลขเป็น MB/s และเทียบกับ rating (MIPS) ของ `7z b` ตรง ๆ ไม่ได้
+เพราะตัวเข้ารหัสใช้ hash chain กับ greedy/lazy parsing ไม่ใช่ optimal parser ของ 7-Zip stream ที่ได้
+ถอดด้วย xz ได้ และ decoder ถูกทดสอบกับ stream ที่ xz สร้าง
 
 สรุปแต่ละหมวดด้วย geometric mean ของอัตราส่วนรายแถว และรายงานแสดงแถวต่ำสุดกับสูงสุด
 ไว้ข้างๆ เสมอ ค่าเฉลี่ยของหมวดซ่อนความต่างขนาดใหญ่ได้ (เช่น SHA-256 กับ RSA อาจไป

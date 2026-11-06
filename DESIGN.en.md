@@ -57,6 +57,7 @@ Other conventions:
 | Part | Method |
 |---|---|
 | micro | 1 warm-up iteration (which also first-touches memory), then N measured iterations with every thread released together by a barrier; reports the median and CV% (above 5% is flagged as noisy) |
+| LZMA | `workload/lzma`: range coder, models and state machine of the LZMA1 format, a hash-chain match finder (hash table sized to the dictionary as in 7-Zip's HC4, depth 32, nice 32), greedy parsing with one step of lazy matching, and no end marker. The input (`lzInput`) is made the way 7-Zip's benchmark makes it. `TestStreamIsPinned` pins the stream's CRC so x86-64 and arm64 produce the same bytes, and `TestDecodesXZ` decodes a stream made by xz |
 | memory BW | strong scaling: the total working set is fixed and divided among the threads, and each thread first-touches its own part, so the pages sit in the same NUMA node as the thread |
 | NUMA matrix | builds a pointer chain on a thread pinned to node M (first-touch), then chases it from node C |
 | web | open model: each request has a scheduled send time (intended time) and latency is measured from that time, so there is no coordinated omission. If the load generator falls behind by more than the deadline, the request counts as dropped and the SLO fails |
