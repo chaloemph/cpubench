@@ -445,6 +445,8 @@ func TestProcurementComparison(t *testing.T) {
 		"picked automatically as the first of several machines (current, vendorc, vendora)",
 		"different contexts (vm/vmware, vm/kvm, native)", // the hypervisor is part of the layer
 		"Whole machine vs current-vm", "| Per machine | +10% | +50% |", "| Per core | +10% | +50% |",
+		"| Single-thread (geomean) | +50% | vendora vs current-vm · 1 thread · 3 workloads |",
+		"| Multi-thread, whole machine (geomean) | +50% | vendora vs current-vm · 8 vs 8 threads · 1 workloads |",
 		"| Per server price | – | +25% |", "| Server price | 1,000,000 THB | – | 1,200,000 THB |",
 		"| Sockets (bare metal only) | – | – | 2 |", "| Watts at full load | 300 W · power-curve | 273 W · power-curve | 200 W · power-curve |",
 		"current · vm/vmware",

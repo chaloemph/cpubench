@@ -50,6 +50,32 @@ type Whole struct {
 // capacity, and would penalise the bigger machine once divided by cores.
 var contended = map[string]bool{"sync/atomic-contended": true, "sync/mutex": true}
 
+// singleThread is the geomean speedup of the throughput workloads at 1
+// thread, the same set the whole-machine ratio takes at the top thread count,
+// so the two read as a single-thread and a multi-thread score. Latency rows
+// are left out: the pointer-chase ladder measures caches and DRAM, and its
+// seven rows would outweigh the compute kernels. nil when only the baseline
+// has 1-thread rows.
+func singleThread(rows []Row) (map[string]float64, map[string]int) {
+	sp := map[string][]float64{}
+	for _, r := range rows {
+		if r.Threads != 1 || !r.HigherIsBetter || contended[r.Name] {
+			continue
+		}
+		for label, s := range r.Speedup {
+			sp[label] = append(sp[label], s)
+		}
+	}
+	if len(sp) < 2 {
+		return nil, nil
+	}
+	ratio, n := map[string]float64{}, map[string]int{}
+	for label, v := range sp {
+		ratio[label], n[label] = benchmark.GeoMean(v), len(v)
+	}
+	return ratio, n
+}
+
 // wholeMachine builds the whole-machine comparison; nil when no two columns
 // share a multi-threaded throughput workload.
 func wholeMachine(files []*result.File, base *result.File) *Whole {

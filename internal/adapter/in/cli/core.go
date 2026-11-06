@@ -363,10 +363,17 @@ func cmdCompare(ctx context.Context, d *Deps, args []string) error {
 		fmt.Fprintf(d.Stdout, "report: %s\n", *md)
 	}
 	cmp := compare.Build(files, *baseline)
-	for _, l := range sortedKeys(cmp.Overall) {
-		if l != cmp.Baseline && l != "web:"+cmp.Baseline {
-			fmt.Fprintf(d.Stdout, "%-28s %+.1f%% vs %s\n", l, (cmp.Overall[l]-1)*100, cmp.Baseline)
+	summary := func(prefix string, m map[string]float64) {
+		for _, l := range sortedKeys(m) {
+			if l != cmp.Baseline && l != "web:"+cmp.Baseline {
+				fmt.Fprintf(d.Stdout, "%-28s %+.1f%% vs %s\n", prefix+l, (m[l]-1)*100, cmp.Baseline)
+			}
 		}
+	}
+	summary("", cmp.Overall)
+	summary("single:", cmp.Single)
+	if cmp.Whole != nil {
+		summary("multi:", cmp.Whole.Ratio[compare.PerMachine])
 	}
 	return nil
 }

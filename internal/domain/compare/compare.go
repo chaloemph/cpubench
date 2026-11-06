@@ -68,6 +68,11 @@ type Report struct {
 	Rows       []Row              `json:"rows"`
 	Categories []CategoryRow      `json:"categories"`
 	Overall    map[string]float64 `json:"overall"` // geomean speedup of all rows
+	// Single is the geomean speedup of the throughput workloads at 1 thread:
+	// the single-thread score, set against Whole as the multi-thread one.
+	Single map[string]float64 `json:"single,omitempty"`
+	// SingleWorkloads is how many workloads each Single ratio rests on.
+	SingleWorkloads map[string]int `json:"single_workloads,omitempty"`
 	// Whole compares each column at its own highest thread count.
 	Whole    *Whole           `json:"whole,omitempty"`
 	Layers   []LayerRow       `json:"layers,omitempty"`
@@ -186,6 +191,7 @@ func Build(files []*result.File, baseline string) Report {
 			}
 		}
 	}
+	rep.Single, rep.SingleWorkloads = singleThread(rep.Rows)
 	rep.Whole = wholeMachine(files, base)
 	rep.Layers = layers(files)
 	return rep

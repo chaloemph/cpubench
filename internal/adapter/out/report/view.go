@@ -247,14 +247,20 @@ func cards(files []*result.File, cmp compare.Report, v view) []card {
 		return out
 	}
 	for _, l := range v.Others {
-		if s, ok := cmp.Overall[l]; ok {
-			out = append(out, card{Label: v.T("card.micro"), Value: pctChange(s), Sub: v.T("card.vs", l, cmp.Baseline), Tone: tone(s)})
+		// single-thread and multi-thread first: the pair a reader knows from
+		// other CPU benchmarks, then the geomean of every row.
+		if s, ok := cmp.Single[l]; ok {
+			out = append(out, card{Label: v.T("card.single"), Value: pctChange(s),
+				Sub: v.T("card.single_sub", l, cmp.Baseline, cmp.SingleWorkloads[l]), Tone: tone(s)})
 		}
 		if w := cmp.Whole; w != nil {
 			if s, ok := w.Ratio[compare.PerMachine][l]; ok {
 				out = append(out, card{Label: v.T("card.whole"), Value: pctChange(s),
-					Sub: v.T("card.whole_sub", l, cmp.Baseline, wholeThreads(w, l), wholeThreads(w, cmp.Baseline)), Tone: tone(s)})
+					Sub: v.T("card.whole_sub", l, cmp.Baseline, wholeThreads(w, l), wholeThreads(w, cmp.Baseline), w.Workloads[l]), Tone: tone(s)})
 			}
+		}
+		if s, ok := cmp.Overall[l]; ok {
+			out = append(out, card{Label: v.T("card.micro"), Value: pctChange(s), Sub: v.T("card.vs", l, cmp.Baseline), Tone: tone(s)})
 		}
 		if s, ok := cmp.Overall["web:"+l]; ok {
 			out = append(out, card{Label: v.T("card.maxrps"), Value: pctChange(s), Sub: v.T("card.vs", l, cmp.Baseline), Tone: tone(s)})

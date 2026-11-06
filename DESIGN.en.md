@@ -65,6 +65,7 @@ Other conventions:
 | power | Redfish (`/Chassis/*/Power` or `EnvironmentMetrics`), IPMI DCMI, RAPL or hwmon, sampled every 1 second and split by each step's time window |
 | TCO | servers = ceil(target / knee) + redundancy and total = capex + W × PUE × 8760 / 1000 × rate × years |
 | whole machine | `compare.Whole`: each column uses the result at each throughput workload's highest thread count (excluding single-thread, latency, `sync/atomic-contended`, `sync/mutex`), takes the geomean of the ratios against the baseline, then divides by usable cores (`System.UsableCores`), sockets (only runs that had the whole machine), watts at full load (`Stress.AvgWatts` or the 100% step of the power curve) and price (`server_price` from the TCO, same currency as the baseline) |
+| single-thread | `compare.singleThread`: geomean of the speedups of the throughput rows at 1 thread (excluding latency, `sync/atomic-contended`, `sync/mutex`), the same workloads `compare.Whole` takes at the highest thread count; the report puts them side by side as the Single-thread and Multi-thread cards, and `compare` prints them as `single:<label>` and `multi:<label>` lines |
 | baseline | `app.DefaultBaseline` uses the first result in the order given and **never chooses by architecture**; `AmbiguousBaseline` returns the machine names when there is more than one, so that the CLI and the report warn you to pass `--baseline` |
 
 ## One command / one button

@@ -174,3 +174,28 @@ func TestWholeMachine(t *testing.T) {
 		t.Errorf("VM sockets used: %v", w.Ratio[PerSocket])
 	}
 }
+
+func TestSingleThread(t *testing.T) {
+	machine := func(label string, k float64) *result.File {
+		return file(label, label, hardware.ModeNative, "amd64",
+			br("int/json", benchmark.Throughput, 1, 10*k, "1"),
+			br("float/matmul", benchmark.Throughput, 1, 40*k*k, "2"),
+			br("int/json", benchmark.Throughput, 8, 70, "1"),            // multi-thread: not single
+			br("sync/mutex", benchmark.Throughput, 1, 1, "3"),           // contended: left out
+			br("mem/latency-512MB", benchmark.Latency, 1, 100/k/k, "4")) // latency: left out
+	}
+	rep := Build([]*result.File{machine("current", 1), machine("vendora", 2)}, "current")
+	// speedups 2 and 4 at 1 thread: geomean √8
+	if got := rep.Single["vendora"]; math.Abs(got-math.Sqrt(8)) > 1e-9 {
+		t.Errorf("single %v want %v", got, math.Sqrt(8))
+	}
+	if rep.Single["current"] != 1 || rep.SingleWorkloads["vendora"] != 2 {
+		t.Errorf("single %v workloads %v", rep.Single, rep.SingleWorkloads)
+	}
+
+	// No 1-thread rows on the candidate: nothing to compare.
+	cand := file("vendorb", "vendorb", hardware.ModeNative, "amd64", br("int/json", benchmark.Throughput, 8, 90, "1"))
+	if rep := Build([]*result.File{machine("current", 1), cand}, "current"); rep.Single != nil {
+		t.Errorf("single without 1-thread rows: %v", rep.Single)
+	}
+}

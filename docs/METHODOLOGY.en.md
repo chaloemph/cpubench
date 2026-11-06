@@ -21,7 +21,11 @@ does that take? We answer it in three views, and a report never mixes them:
 | Web | Open-model HTTP load until the SLO breaks | How many requests per second does the server sustain within p99 and error limits? |
 
 A per-core result from a small VM says nothing about a whole 2-socket server, and
-the other way round. Every report states which view a number belongs to.
+the other way round. Every report states which view a number belongs to. The
+**Single-thread** card at the top of the report belongs to the per-core view (at
+1 thread) and the **Multi-thread** card is the whole-machine view. Both use the
+same throughput workloads and are ratios against the baseline, not standalone
+scores.
 
 ## 2. Rules that make two runs comparable
 

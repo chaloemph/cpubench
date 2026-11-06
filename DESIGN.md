@@ -65,6 +65,7 @@ internal/
 | power | ใช้ Redfish (`/Chassis/*/Power` หรือ `EnvironmentMetrics`), IPMI DCMI, RAPL หรือ hwmon และ sample ทุก 1 วินาทีแล้วแบ่งตามช่วงเวลาของแต่ละ step |
 | TCO | servers = ceil(target / knee) + redundancy และ total = capex + W × PUE × 8760 / 1000 × rate × ปี |
 | ทั้งเครื่อง | `compare.Whole`: แต่ละคอลัมน์ใช้ผลที่จำนวน thread สูงสุดของแต่ละ workload แบบ throughput (ไม่รวม single-thread, latency, `sync/atomic-contended`, `sync/mutex`) แล้วหา geomean ของอัตราส่วนเทียบ baseline จากนั้นหารด้วย core ที่ใช้ได้ (`System.UsableCores`), socket (เฉพาะ run ที่ได้ทั้งเครื่อง), วัตต์ตอนโหลดเต็ม (`Stress.AvgWatts` หรือขั้น 100% ของ power curve) และราคา (`server_price` จาก TCO สกุลเงินเดียวกับ baseline) |
+| single-thread | `compare.singleThread`: geomean ของ speedup ของแถว throughput ที่ 1 thread (ไม่รวม latency, `sync/atomic-contended`, `sync/mutex`) เป็น workload ชุดเดียวกับที่ `compare.Whole` ใช้ที่จำนวน thread สูงสุด report วางคู่กันเป็นการ์ด Single-thread และ Multi-thread และ `compare` พิมพ์เป็นบรรทัด `single:<label>` กับ `multi:<label>` |
 | baseline | `app.DefaultBaseline` ใช้ผลแรกตามลำดับที่ส่งเข้ามา **ไม่เลือกตามสถาปัตยกรรม** ส่วน `AmbiguousBaseline` คืนรายชื่อเครื่องเมื่อมีมากกว่าหนึ่งเครื่อง เพื่อให้ CLI และ report เตือนให้ระบุ `--baseline` |
 
 ## คำสั่งเดียว / ปุ่มเดียว
