@@ -16,7 +16,7 @@ import (
 // All returns every built-in workload in a stable order.
 func All() []benchmark.Workload {
 	ws := []benchmark.Workload{
-		&sortWL{}, &compressWL{}, &decompressWL{}, &jsonWL{}, &regexWL{}, &hashmapWL{},
+		&sortWL{}, &compressWL{}, &decompressWL{}, &lzmaCompressWL{}, &lzmaDecompressWL{}, &jsonWL{}, &regexWL{}, &hashmapWL{},
 		&matmulWL{}, &nbodyWL{}, &fftWL{},
 		&aesGCMWL{}, &sha256WL{}, &ecdsaWL{}, &rsaWL{},
 		&triadWL{}, &copyWL{},

@@ -57,6 +57,7 @@ internal/
 | ส่วน | วิธี |
 |---|---|
 | micro | warmup 1 รอบ (และเป็นการ first-touch memory ด้วย) จากนั้นวัด N รอบโดยปล่อยทุก thread พร้อมกันด้วย barrier แล้วรายงาน median และ CV% (เกิน 5% จะ flag ว่า noisy) |
+| LZMA | `workload/lzma`: range coder, model และ state machine ตาม format LZMA1, match finder แบบ hash chain (ตาราง hash ขนาดตาม dictionary เหมือน HC4 ของ 7-Zip, depth 32, nice 32), greedy parsing พร้อม lazy หนึ่งขั้น และไม่มี end marker ข้อมูลเข้า (`lzInput`) สร้างแบบ benchmark ของ 7-Zip `TestStreamIsPinned` ตรึง CRC ของ stream ไว้ให้ x86-64 กับ arm64 ได้ byte เดียวกัน และ `TestDecodesXZ` ถอด stream ที่ xz สร้าง |
 | memory BW | strong scaling: working set รวมคงที่แล้วแบ่งให้แต่ละ thread และแต่ละ thread first-touch ส่วนของตัวเอง หน้า memory จึงอยู่ NUMA node เดียวกับ thread |
 | NUMA matrix | สร้าง pointer chain บน thread ที่ pin ไว้ใน node M (first-touch) แล้ว chase จาก node C |
 | web | open model: request แต่ละตัวมีเวลาส่งที่กำหนดไว้ (intended time) และวัด latency จากเวลานั้น จึงไม่เกิด coordinated omission ถ้า load-gen ตามไม่ทันเกิน deadline จะนับเป็น dropped และถือว่า SLO fail |
@@ -65,6 +66,7 @@ internal/
 | power | ใช้ Redfish (`/Chassis/*/Power` หรือ `EnvironmentMetrics`), IPMI DCMI, RAPL หรือ hwmon และ sample ทุก 1 วินาทีแล้วแบ่งตามช่วงเวลาของแต่ละ step |
 | TCO | servers = ceil(target / knee) + redundancy และ total = capex + W × PUE × 8760 / 1000 × rate × ปี |
 | ทั้งเครื่อง | `compare.Whole`: แต่ละคอลัมน์ใช้ผลที่จำนวน thread สูงสุดของแต่ละ workload แบบ throughput (ไม่รวม single-thread, latency, `sync/atomic-contended`, `sync/mutex`) แล้วหา geomean ของอัตราส่วนเทียบ baseline จากนั้นหารด้วย core ที่ใช้ได้ (`System.UsableCores`), socket (เฉพาะ run ที่ได้ทั้งเครื่อง), วัตต์ตอนโหลดเต็ม (`Stress.AvgWatts` หรือขั้น 100% ของ power curve) และราคา (`server_price` จาก TCO สกุลเงินเดียวกับ baseline) |
+| single-thread | `compare.singleThread`: geomean ของ speedup ของแถว throughput ที่ 1 thread (ไม่รวม latency, `sync/atomic-contended`, `sync/mutex`) เป็น workload ชุดเดียวกับที่ `compare.Whole` ใช้ที่จำนวน thread สูงสุด report วางคู่กันเป็นการ์ด Single-thread และ Multi-thread และ `compare` พิมพ์เป็นบรรทัด `single:<label>` กับ `multi:<label>` |
 | baseline | `app.DefaultBaseline` ใช้ผลแรกตามลำดับที่ส่งเข้ามา **ไม่เลือกตามสถาปัตยกรรม** ส่วน `AmbiguousBaseline` คืนรายชื่อเครื่องเมื่อมีมากกว่าหนึ่งเครื่อง เพื่อให้ CLI และ report เตือนให้ระบุ `--baseline` |
 
 ## คำสั่งเดียว / ปุ่มเดียว

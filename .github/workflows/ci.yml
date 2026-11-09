@@ -16,6 +16,9 @@ jobs:
         # Run on both architectures: workload checksums must match across them.
         os: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
+    # A run takes under a minute; without this a hung test holds the runner for
+    # the 6-hour default.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

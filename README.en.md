@@ -175,6 +175,14 @@ Read the warnings before any number; see
 [docs/METHODOLOGY.en.md §5](docs/METHODOLOGY.en.md#5-reading-the-report). Set the
 language with `cpubench compare --lang th|en` (default `th`).
 
+The headline cards open with **Single-thread** (geomean of the throughput
+workloads at 1 thread) beside **Multi-thread, whole machine** (the same
+workloads at each machine's own maximum thread count). Both are ratios against
+the baseline and leave out memory latency, `sync/atomic-contended` and
+`sync/mutex`. The single-thread score needs results at 1 thread, which every
+`auto` profile has; when you call `run --threads` yourself, include `1`.
+`compare` prints both on stdout as `single:<label>` and `multi:<label>` lines.
+
 The **whole machine** section compares each machine at its own maximum thread
 count, per machine, per core, per socket (bare metal only), per watt (needs
 `--power`) and per price (`server_price` from `--tco`, same currency as the

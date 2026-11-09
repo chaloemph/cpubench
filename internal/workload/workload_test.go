@@ -64,7 +64,27 @@ func TestSelect(t *testing.T) {
 	if n := len(Select(All(), "mem/latency")); n != len(LatencySizesKB) {
 		t.Fatalf("latency: %d", n)
 	}
+	if n := len(Select(All(), "int/lzma")); n != 2 {
+		t.Fatalf("lzma: %d", n)
+	}
 	if Find("int/json") == nil || Find("nope") != nil {
 		t.Fatal("find")
+	}
+}
+
+// The LZMA decompress kernel must rebuild exactly the generated input, and
+// the input must compress about as 7-Zip's benchmark data does: well, but far
+// from completely, because of the random runs between repeats.
+func TestLZMAWorkloads(t *testing.T) {
+	w := &lzmaDecompressWL{}
+	if err := w.Setup(1, 0.05); err != nil {
+		t.Fatal(err)
+	}
+	in := lzInput(len(w.out[0]), 8)
+	if _, sum := w.RunThread(0); sum != crc(in) {
+		t.Fatal("decompressed bytes differ from the input")
+	}
+	if r := float64(len(w.packed)) / float64(len(in)); r < 0.2 || r > 0.6 {
+		t.Errorf("compression ratio %.2f, want 0.2-0.6", r)
 	}
 }

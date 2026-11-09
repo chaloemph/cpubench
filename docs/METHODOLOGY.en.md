@@ -21,7 +21,11 @@ does that take? We answer it in three views, and a report never mixes them:
 | Web | Open-model HTTP load until the SLO breaks | How many requests per second does the server sustain within p99 and error limits? |
 
 A per-core result from a small VM says nothing about a whole 2-socket server, and
-the other way round. Every report states which view a number belongs to.
+the other way round. Every report states which view a number belongs to. The
+**Single-thread** card at the top of the report belongs to the per-core view (at
+1 thread) and the **Multi-thread** card is the whole-machine view. Both use the
+same throughput workloads and are ratios against the baseline, not standalone
+scores.
 
 ## 2. Rules that make two runs comparable
 
@@ -91,11 +95,22 @@ at a time, then on SMT siblings.
 
 | Category | Benchmarks | Stands for |
 |---|---|---|
-| integer | `int/json`, `int/regex`, `int/sort`, `int/hashmap`, `int/compress`, `int/decompress` | Typical application logic: parsing, matching, maps, compression |
+| integer | `int/json`, `int/regex`, `int/sort`, `int/hashmap`, `int/compress`, `int/decompress`, `int/lzma-compress`, `int/lzma-decompress` | Typical application logic: parsing, matching, maps, compression (gzip-style deflate and 7-Zip/xz-style LZMA) |
 | float | `float/matmul`, `float/nbody`, `float/fft` | Numeric code |
 | crypto | `crypto/aes-gcm`, `crypto/sha256`, `crypto/ecdsa-p256`, `crypto/rsa2048-sign` | TLS bulk encryption, hashing, TLS handshakes |
 | memory | `mem/triad`, `mem/copy` (bandwidth), `mem/latency-32K … 512M` (pointer chase), NUMA matrix (`standard`/`full`) | Cache and DRAM behaviour, cross-node cost |
 | concurrency | `sync/atomic-local`, `sync/atomic-contended`, `sync/mutex`, `sync/pingpong` | Lock-heavy code, cross-core communication |
+
+`int/lzma-compress` and `int/lzma-decompress` use an LZMA codec written in Go
+inside cpubench (16MB dictionary, lc=3 lp=0 pb=2 as in the 7-Zip and xz
+defaults) on synthetic data made the way 7-Zip's built-in benchmark makes it:
+runs of random bytes between repeats of earlier data, with the repeats reaching
+back across the whole dictionary. They measure the range coder (hard-to-predict
+branches) and random memory reads, the two things that spread 7-Zip scores
+widely between CPUs. The numbers are MB/s and do not compare directly with the
+rating (MIPS) of `7z b`, because the encoder uses a hash chain with greedy/lazy
+parsing, not 7-Zip's optimal parser. Its streams decode with xz, and the decoder
+is tested against a stream made by xz.
 
 Categories are summarised with a geometric mean of the per-row ratios, and the
 report always shows the lowest and highest row next to it. A category mean hides
